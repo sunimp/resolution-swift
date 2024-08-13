@@ -1,6 +1,6 @@
 //
 //  DnsType.swift
-//  UnstoppableDomainsResolution
+//  DomainsResolution
 //
 //  Created by Johnny Good on 12/17/20.
 //  Copyright © 2020 Unstoppable Domains. All rights reserved.

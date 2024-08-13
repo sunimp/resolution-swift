@@ -92,7 +92,6 @@
 		3EB45BD626E96FC500D25F10 /* UNSLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UNSLayer.swift; sourceTree = "<group>"; };
 		3EB45BDC26EAB26100D25F10 /* AsyncResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncResolver.swift; sourceTree = "<group>"; };
 		3EC9E04B2697FF84001521B4 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
-		3EC9E04E2698002F001521B4 /* UnstoppableDomainsResolution.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = UnstoppableDomainsResolution.podspec; sourceTree = "<group>"; };
 		3ECD84AD25A6AEE1001772DD /* UsdtVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsdtVersion.swift; sourceTree = "<group>"; };
 		3EE4DA0324E367720097540B /* Resolution.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Resolution.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EE4DA0624E367720097540B /* resolution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = resolution.h; sourceTree = "<group>"; };
@@ -206,7 +205,6 @@
 		3EE4D9F924E367720097540B = {
 			isa = PBXGroup;
 			children = (
-				3EC9E04E2698002F001521B4 /* UnstoppableDomainsResolution.podspec */,
 				3EC9E04B2697FF84001521B4 /* CHANGELOG.md */,
 				8425AED824FFBADF00BBCBBA /* README.md */,
 				3045D148251E2C6200B65A06 /* LICENSE.md */,
@@ -415,7 +413,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3EE4D9FD24E367720097540B /* Build configuration list for PBXProject "resolution" */;
+			buildConfigurationList = 3EE4D9FD24E367720097540B /* Build configuration list for PBXProject "Resolution" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -779,7 +777,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3EE4D9FD24E367720097540B /* Build configuration list for PBXProject "resolution" */ = {
+		3EE4D9FD24E367720097540B /* Build configuration list for PBXProject "Resolution" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3EE4DA1524E367720097540B /* Debug */,

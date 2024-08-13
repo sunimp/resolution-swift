@@ -1,11 +1,10 @@
-# UnstoppableDomainsResolution
+# DomainsResolution
 
 [![Get help on Discord](https://img.shields.io/badge/Get%20help%20on-Discord-blueviolet)](https://discord.gg/b6ZVxSZ9Hn)
-[![Unstoppable Domains Documentation](https://img.shields.io/badge/Documentation-unstoppabledomains.com-blue)](https://docs.unstoppabledomains.com/)
 
 Resolution is a library for interacting with blockchain domain names. It can be used to retrieve payment addresses and IPFS hashes for decentralized websites.
 
-Resolution is primarily built and maintained by [Unstoppable Domains](https://unstoppabledomains.com/).
+Resolution is primarily built and maintained by [Sun](https://github.com/sunimp).
 
 - [Installing Resolution](#installing-resolution-swift)
 - [Using Resolution](#using-resolution)
@@ -14,33 +13,21 @@ Resolution is primarily built and maintained by [Unstoppable Domains](https://un
 
 # Installing resolution-swift
 
-## Cocoa Pods
-
-```ruby
-pod 'UnstoppableDomainsResolution', '~> 6.1.0'
-```
-
 ## Swift Package Manager
 
 ```swift
 package.dependencies.append(
-    .package(url: "https://github.com/unstoppabledomains/resolution-swift", from: "6.1.0")
+    .package(url: "https://github.com/sunimp/resolution-swift", from: "6.2.0")
 )
 ```
 
 # Updating the library
 
-## Cocoa Pods
-
-```ruby
-pod update UnstoppableDomainsResolution
-```
-
 ## Swift Package Manager
 
 ```swift
 package.dependencies.append(
-    .package(url: "https://github.com/unstoppabledomains/resolution-swift", from: "<latest version number>")
+    .package(url: "https://github.com/sunimp/resolution-swift", from: "<latest version number>")
 )
 ```
 
@@ -54,7 +41,7 @@ package.dependencies.append(
 ## Initialize with Unstoppable Domains' Proxy Provider
 
 ```swift
-import UnstoppableDomainsResolution
+import DomainsResolution
 
 // obtain a key by following this document https://docs.unstoppabledomains.com/domain-distribution-and-management/quickstart/retrieve-an-api-key/#api-key
 guard let resolution = try? Resolution(apiKey: "<api_key>") else {
@@ -66,7 +53,7 @@ guard let resolution = try? Resolution(apiKey: "<api_key>") else {
 > NOTE: The `apiKey` is only used resolve domains from UNS. Behind the scene, it still uses the default ZNS (Zilliqa) RPC url. For additional control, please specify your ZNS configuration.
 
 ```swift
-import UnstoppableDomainsResolution
+import DomainsResolution
 
 // obtain a key by following this document https://docs.unstoppabledomains.com/domain-distribution-and-management/quickstart/retrieve-an-api-key/#api-key
 guard let resolution = try? Resolution(
@@ -86,7 +73,7 @@ The `Configurations` struct that is used for configuring each connected naming s
 Library supports three networks at the moment Ethereum, Polygon and Zilliqa. You can update each network separately.
 
 ```swift
-import UnstoppableDomainsResolution
+import DomainsResolution
 
 // obtain a key from https://www.infura.io
 let resolution = try Resolution(configs: Configurations(
@@ -401,10 +388,6 @@ Use `swift build` to build, and `swift test -v` to run the tests
 Once your app has a working Unstoppable Domains integration, [register it here](https://unstoppabledomains.com/app-submission). Registered apps appear on the Unstoppable Domains [homepage](https://unstoppabledomains.com/) and [Applications](https://unstoppabledomains.com/apps) page — putting your app in front of tens of thousands of potential customers per day.
 
 Also, every week we select a newly-integrated app to feature in the Unstoppable Update newsletter. This newsletter is delivered to straight into the inbox of ~100,000 crypto fanatics — all of whom could be new customers to grow your business.
-
-# Get help
-
-[Join our discord community](https://discord.gg/unstoppabledomains) and ask questions.
 
 # Help us improve
 

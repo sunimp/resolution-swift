@@ -1,6 +1,6 @@
 //
 //  Layer1.swift
-//  UnstoppableDomainsResolution
+//  DomainsResolution
 //
 //  Created by Johnny Good on 9/8/21.
 //  Copyright © 2021 Unstoppable Domains. All rights reserved.

@@ -1,24 +1,24 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "UnstoppableDomainsResolution",
-    platforms: [.macOS(.v10_15), .iOS(.v11) ],
+    name: "DomainsResolution",
+    platforms: [.macOS(.v10_15), .iOS(.v14) ],
     products: [
         .library(
-            name: "UnstoppableDomainsResolution",
+            name: "DomainsResolution",
             type: nil,
-            targets: ["UnstoppableDomainsResolution"])
+            targets: ["DomainsResolution"])
     ],
     dependencies: [
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.8.3")),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.0.0")
     ],
     targets: [
         .target(
-            name: "UnstoppableDomainsResolution",
+            name: "DomainsResolution",
             dependencies: ["CryptoSwift", "BigInt"],
             resources: [
                 .process("Resources/UNS/resolver-keys.json"),
@@ -34,7 +34,7 @@ let package = Package(
         ),
         .testTarget(
             name: "ResolutionTests",
-            dependencies: ["UnstoppableDomainsResolution"],
+            dependencies: ["DomainsResolution"],
             exclude: ["Info.plist"],
             swiftSettings: [.define("INSIDE_PM")]
         )

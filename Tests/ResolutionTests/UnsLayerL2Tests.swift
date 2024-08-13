@@ -9,7 +9,7 @@
 import XCTest
 
 #if INSIDE_PM
-@testable import UnstoppableDomainsResolution
+@testable import DomainsResolution
 #else
 @testable import Resolution
 #endif

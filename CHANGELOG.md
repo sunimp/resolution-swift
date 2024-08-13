@@ -1,5 +1,8 @@
 # Resolution-swift CHANGELOG
 
+## 6.2.0 - 2024-08-13
+Rename
+
 ## 6.1.0 - 2023-07-10
 
 Add new addr override
@@ -85,7 +88,7 @@ Remove default RPC urls, Allow initialized with UD partner key
 - Introduce Resolution#tokenURIMetadata - Retrieves the data from the endpoint provided by tokenURI from the registry smart contract.
 - Introduce Resolution#unhash - Retrieves the domain name from token metadata that is provided by tokenURI from the registry smart contract
 - Return `ENS` support
-- Allowed custom networks for each of the naming services. If custom network has been set, it is required to set the proxyReader contract address for UNS and registryAddress for ENS && ZNS (see `./Sources/UnstoppableDomainsResolution/Resources/UNS/uns-config.json`)
+- Allowed custom networks for each of the naming services. If custom network has been set, it is required to set the proxyReader contract address for UNS and registryAddress for ENS && ZNS (see `./Sources/DomainsResolution/Resources/UNS/uns-config.json`)
 
 ## 1.0.0
 
