@@ -85,6 +85,6 @@ public struct Configurations {
     }
 
     static public func getLibVersion() -> String {
-        return "UnstoppableDomains/resolution-swift/6.2.1"
+        return "UnstoppableDomains/resolution-swift/6.2.2"
     }
 }

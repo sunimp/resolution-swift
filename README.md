@@ -17,7 +17,7 @@ Resolution is primarily built and maintained by [Sun](https://github.com/sunimp)
 
 ```swift
 package.dependencies.append(
-    .package(url: "https://github.com/sunimp/resolution-swift", from: "6.2.0")
+    .package(url: "https://github.com/sunimp/resolution-swift", from: "6.2.2")
 )
 ```
 
