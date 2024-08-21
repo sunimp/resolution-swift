@@ -1,10 +1,10 @@
 //
 //  TestHelpers.swift
-//  resolution
+//  ResolutionTests
 //
-//  Created by Johnny Good on 9/21/21.
-//  Copyright © 2021 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
+
 import XCTest
 
 #if INSIDE_PM

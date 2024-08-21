@@ -1,9 +1,8 @@
 //
 //  ABIParsing.swift
-//  resolution
+//  DomainsResolution
 //
-//  Created by Serg Merenkov on 2/8/21.
-//  Copyright © 2021 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
 
 import Foundation

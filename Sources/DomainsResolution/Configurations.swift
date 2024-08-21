@@ -2,8 +2,7 @@
 //  Configuration.swift
 //  DomainsResolution
 //
-//  Created by Johnny Good on 2/16/21.
-//  Copyright © 2021 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
 
 import Foundation
@@ -86,6 +85,6 @@ public struct Configurations {
     }
 
     static public func getLibVersion() -> String {
-        return "UnstoppableDomains/resolution-swift/6.1.0"
+        return "UnstoppableDomains/resolution-swift/6.2.1"
     }
 }

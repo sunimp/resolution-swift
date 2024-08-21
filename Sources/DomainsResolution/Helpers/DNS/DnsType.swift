@@ -2,11 +2,11 @@
 //  DnsType.swift
 //  DomainsResolution
 //
-//  Created by Johnny Good on 12/17/20.
-//  Copyright © 2020 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
-// swiftlint:disable identifier_name
 
+
+// swiftlint:disable identifier_name
 import Foundation
 
 public enum DnsType: String {

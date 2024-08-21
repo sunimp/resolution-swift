@@ -1,12 +1,11 @@
 //
 //  EthereumAddress.swift
-//  EthereumAddress
+//  DomainsResolution
 //
-//  Created by Alex Vlasov on 25/10/2018.
-//  Copyright © 2018 Alex Vlasov. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
-// swiftlint:disable all
 
+// swiftlint:disable all
 import Foundation
 import CryptoSwift
 

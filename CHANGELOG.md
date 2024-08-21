@@ -1,5 +1,8 @@
 # Resolution-swift CHANGELOG
 
+## 6.2.1 - 2024-08-21
+Rename
+
 ## 6.2.0 - 2024-08-13
 Rename
 

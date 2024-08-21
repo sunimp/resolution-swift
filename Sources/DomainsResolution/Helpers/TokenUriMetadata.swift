@@ -1,3 +1,10 @@
+//
+//  TokenUriMetadata.swift
+//  DomainsResolution
+//
+//  Created by Sun on 2024/8/21.
+//
+
 import Foundation
 
 public struct TokenUriMetadata: Codable {

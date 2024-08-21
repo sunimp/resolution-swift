@@ -2,8 +2,7 @@
 //  UnsLayerL2Tests.swift
 //  ResolutionTests
 //
-//  Created by Johnny Good on 9/23/21.
-//  Copyright © 2021 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
 
 import XCTest

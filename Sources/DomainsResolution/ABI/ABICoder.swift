@@ -1,9 +1,8 @@
 //
 //  ABICoder.swift
-//  resolution
+//  DomainsResolution
 //
-//  Created by Johnny Good on 8/17/20.
-//  Copyright © 2020 Unstoppable Domains. All rights reserved.
+//  Created by Sun on 2024/8/21.
 //
 
 import Foundation

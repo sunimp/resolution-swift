@@ -26,9 +26,7 @@ let package = Package(
                 .process("Resources/UNS/unsRegistry.json"),
                 .process("Resources/UNS/cnsRegistry.json"),
                 .process("Resources/UNS/unsResolver.json"),
-                .process("Resources/UNS/uns-config.json"),
-                .process("Resources/ENS/ensRegistry.json"),
-                .process("Resources/ENS/ensResolver.json")
+                .process("Resources/UNS/uns-config.json")
             ],
             swiftSettings: [.define("INSIDE_PM")]
         ),
