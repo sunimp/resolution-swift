@@ -259,11 +259,11 @@ extension ABIEncoder {
 
         case .string:
             if let string = value as? String {
-                var dataGuess: Data? = nil
+                let dataGuess: Data? =
                 if string.hasHexPrefix() {
-                    dataGuess = Data.fromHex(string.lowercased().stripHexPrefix())
+                    Data.fromHex(string.lowercased().stripHexPrefix())
                 } else {
-                    dataGuess = string.data(using: .utf8)
+                    string.data(using: .utf8)
                 }
                 guard let data = dataGuess else { break }
                 let minLength = ((data.count + 31) / 32) * 32

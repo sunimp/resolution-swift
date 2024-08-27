@@ -12,7 +12,7 @@ import XCTest
 @testable import Resolution
 #endif
 
-var resolution: Resolution! = nil
+var resolution: Resolution!
 
 // MARK: - TestConfigError
 

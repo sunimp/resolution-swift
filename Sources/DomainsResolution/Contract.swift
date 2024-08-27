@@ -79,7 +79,7 @@ class Contract {
                 throw ResolutionError.recordNotSupported
             }
 
-            var res: Any? = nil
+            var res: Any?
             do {
                 res = try self.coder.decode(responseElement.result, from: methodName)
             } catch ABICoderError.couldNotDecode {
@@ -101,8 +101,8 @@ class Contract {
 
     private func postRequest(_ body: JsonRpcPayload) throws -> ParamElement? {
         let postRequest = APIRequest(providerURL, networking: networking)
-        var resp: JsonRpcResponseArray? = nil
-        var err: Error? = nil
+        var resp: JsonRpcResponseArray?
+        var err: Error?
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(body, completion: { result in
             switch result {
@@ -122,8 +122,8 @@ class Contract {
 
     private func postBatchRequest(_ bodyArray: [JsonRpcPayload]) throws -> [IdentifiableResult<String>?] {
         let postRequest = APIRequest(providerURL, networking: networking)
-        var resp: JsonRpcResponseArray? = nil
-        var err: Error? = nil
+        var resp: JsonRpcResponseArray?
+        var err: Error?
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(bodyArray, completion: { result in
             switch result {

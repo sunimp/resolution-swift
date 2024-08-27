@@ -71,7 +71,7 @@ public enum ABITypeParser {
             return (nil, nil)
         }
         var tail = ""
-        var type: ABI.Element.ParameterType? = nil
+        var type: ABI.Element.ParameterType?
         guard match[0].numberOfRanges >= 1 else { return (nil, nil) }
         guard let baseTypeRange = Range(match[0].range(at: 1), in: string) else { return (nil, nil) }
         let baseTypeString = String(string[baseTypeRange])
@@ -108,7 +108,7 @@ public enum ABITypeParser {
         let match = matcher.matches(in: string, options: NSRegularExpression.MatchingOptions.anchored, range: string.fullNSRange)
         guard match.count == 1 else { return (nil, nil) }
         var tail = ""
-        var type: ABI.Element.ParameterType? = nil
+        var type: ABI.Element.ParameterType?
         guard match[0].numberOfRanges >= 1 else { return (nil, nil) }
         guard let baseArrayRange = Range(match[0].range(at: 1), in: string) else { return (nil, nil) }
         let baseArrayString = String(string[baseArrayRange])

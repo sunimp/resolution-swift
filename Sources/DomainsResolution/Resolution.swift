@@ -489,7 +489,7 @@ public class Resolution {
     /// this returns [NamingService] from the configurations
     private func constructNetworkServices(_ configs: Configurations) throws -> [NamingService] {
         var networkServices: [NamingService] = []
-        var errorService: Error? = nil
+        var errorService: Error?
         do {
             networkServices.append(try UNS(configs))
         } catch {

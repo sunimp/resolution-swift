@@ -50,8 +50,8 @@ class ContractZNS {
 
     private func postRequest(_ body: JsonRpcPayload) throws -> Any? {
         let postRequest = APIRequest(providerURL, networking: networking)
-        var resp: JsonRpcResponse? = nil
-        var err: Error? = nil
+        var resp: JsonRpcResponse?
+        var err: Error?
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(body, completion: { result in
             switch result {

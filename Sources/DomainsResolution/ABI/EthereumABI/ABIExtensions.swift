@@ -198,7 +198,7 @@ extension [UInt8] {
     init(hex: String) {
         self.init()
         reserveCapacity(hex.unicodeScalars.lazy.underestimatedCount)
-        var buffer: UInt8? = nil
+        var buffer: UInt8?
         var skip = hex.hasPrefix("0x") ? 2 : 0
         for char in hex.unicodeScalars.lazy {
             guard skip == 0 else {
