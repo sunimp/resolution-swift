@@ -7,37 +7,40 @@
 
 import Foundation
 
+// MARK: - TokenUriMetadata
+
 public struct TokenUriMetadata: Codable {
     let name: String?
-    let tokenId: String?
+    let tokenID: String?
     let namehash: String?
     let description: String?
-    let externalUrl: String?
+    let externalURL: String?
     let image: String?
     let attributes: [TokenUriMetadataAttribute]
     var backgroundColor: String?
-    var animationUrl: String?
-    var youtubeUrl: String?
+    var animationURL: String?
+    var youtubeURL: String?
     var externalLink: String?
     var imageData: String?
 
     enum CodingKeys: String, CodingKey {
         case name
-        case tokenId
+        case tokenID
         case namehash
         case description
-        case externalUrl = "external_url"
+        case externalURL = "external_url"
         case image
         case attributes
         case backgroundColor = "background_color"
-        case animationUrl = "animation_url"
-        case youtubeUrl = "youtube_url"
+        case animationURL = "animation_url"
+        case youtubeURL = "youtube_url"
         case externalLink = "external_link"
         case imageData = "image_data"
     }
 }
 
-// MARK: - Attribute
+// MARK: - TokenUriMetadataAttribute
+
 public struct TokenUriMetadataAttribute: Codable {
     let displayType: String?
     let traitType: String?
@@ -49,6 +52,8 @@ public struct TokenUriMetadataAttribute: Codable {
         case value
     }
 }
+
+// MARK: - TokenUriMetadataValue
 
 struct TokenUriMetadataValue: Codable {
     let value: String
@@ -69,7 +74,10 @@ struct TokenUriMetadataValue: Codable {
         } else if let bool = try? container.decode(Bool.self) {
             value = bool.description
         } else {
-            throw DecodingError.typeMismatch(String.self, .init(codingPath: decoder.codingPath, debugDescription: "Failed to decode token metadata attribute value."))
+            throw DecodingError.typeMismatch(
+                String.self,
+                .init(codingPath: decoder.codingPath, debugDescription: "Failed to decode token metadata attribute value.")
+            )
         }
     }
 

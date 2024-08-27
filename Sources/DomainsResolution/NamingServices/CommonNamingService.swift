@@ -7,12 +7,14 @@
 
 import Foundation
 
+// MARK: - CommonNamingService
+
 class CommonNamingService {
     static let hexadecimalPrefix = "0x"
     static let jsonExtension = "json"
 
     let name: NamingServiceName
-    let providerUrl: String
+    let providerURL: String
     let networking: NetworkingLayer
 
     enum ContractType: String {
@@ -23,23 +25,23 @@ class CommonNamingService {
         case proxyReader = "ProxyReader"
 
         var name: String {
-            self.rawValue
+            rawValue
         }
     }
 
-    init(name: NamingServiceName, providerUrl: String, networking: NetworkingLayer) {
+    init(name: NamingServiceName, providerURL: String, networking: NetworkingLayer) {
         self.name = name
-        self.providerUrl = providerUrl
+        self.providerURL = providerURL
         self.networking = networking
     }
 
     func buildContract(address: String, type: ContractType) throws -> Contract {
-        return try self.buildContract(address: address, type: type, providerUrl: self.providerUrl)
+        try buildContract(address: address, type: type, providerURL: providerURL)
     }
 
-    func buildContract(address: String, type: ContractType, providerUrl: String) throws -> Contract {
+    func buildContract(address: String, type: ContractType, providerURL: String) throws -> Contract {
         let jsonFileName: String
-        let url = providerUrl
+        let url = providerURL
         let nameLowCased = name.rawValue.lowercased()
         switch type {
         case .unsRegistry:
@@ -55,7 +57,7 @@ class CommonNamingService {
         }
 
         let abi: ABIContract = try parseAbi(fromFile: jsonFileName)!
-        return Contract(providerUrl: url, address: address, abi: abi, networking: networking)
+        return Contract(providerURL: url, address: address, abi: abi, networking: networking)
     }
 
     func parseAbi(fromFile name: String) throws -> ABIContract? {
@@ -68,7 +70,7 @@ class CommonNamingService {
             let data = try Data(contentsOf: filePath)
             let jsonDecoder = JSONDecoder()
             let abi = try jsonDecoder.decode([ABI.Record].self, from: data)
-            let abiNative = try abi.map({ (record) -> ABI.Element in
+            let abiNative = try abi.map({ record -> ABI.Element in
                 return try record.parse()
             })
 
@@ -78,12 +80,12 @@ class CommonNamingService {
     }
 
     func namehash(domain: String) -> String {
-        var node = [UInt8].init(repeating: 0x0, count: 32)
-        if domain.count > 0 {
+        var node = [UInt8](repeating: 0x0, count: 32)
+        if !domain.isEmpty {
             node = domain.split(separator: ".")
-                .map { Array($0.utf8)}
+                .map { Array($0.utf8) }
                 .reversed()
-                .reduce(node) { return self.childHash(parent: $0, label: $1)}
+                .reduce(node) { self.childHash(parent: $0, label: $1) }
         }
         return "\(Self.hexadecimalPrefix)\(node.toHexString())"
     }
@@ -97,17 +99,18 @@ class CommonNamingService {
 extension CommonNamingService {
     static let networkConfigFileName = "uns-config"
     static let recordKeysFileName = "resolver-keys"
-    static let networkIds = ["mainnet": "1",
-                             "ropsten": "3",
-                             "goerli": "5",
-                             "polygon-mumbai": "80001",
-                             "polygon-mainnet": "137"
+    static let networkIDs = [
+        "mainnet": "1",
+        "ropsten": "3",
+        "goerli": "5",
+        "polygon-mumbai": "80001",
+        "polygon-mainnet": "137",
     ]
     static let networkToBlockchain = [
         "mainnet": "ETH",
         "goerli": "ETH",
         "polygon-mumbai": "MATIC",
-        "polygon-mainnet": "MATIC"
+        "polygon-mainnet": "MATIC",
     ]
 
     struct NewtorkConfigJson: Decodable {
@@ -143,7 +146,7 @@ extension CommonNamingService {
         let bundler = Bundle(for: self)
         #endif
 
-        guard let idString = networkIds[network] else { return nil }
+        guard let idString = networkIDs[network] else { return nil }
 
         if let filePath = bundler.url(forResource: Self.networkConfigFileName, withExtension: "json") {
             guard let data = try? Data(contentsOf: filePath) else { return nil }
@@ -171,14 +174,14 @@ extension CommonNamingService {
         return nil
     }
 
-    static func getNetworkName(providerUrl: String, networking: NetworkingLayer) throws -> String {
-        let networkId = try Self.getNetworkId(providerUrl: providerUrl, networking: networking)
-        return networkIds.key(forValue: networkId) ?? ""
+    static func getNetworkName(providerURL: String, networking: NetworkingLayer) throws -> String {
+        let networkID = try Self.getNetworkID(providerURL: providerURL, networking: networking)
+        return networkIDs.key(forValue: networkID) ?? ""
     }
 
-    static func getNetworkId(providerUrl: String, networking: NetworkingLayer) throws -> String {
-        let url = URL(string: providerUrl)!
-        let payload: JsonRpcPayload = JsonRpcPayload(jsonrpc: "2.0", id: "67", method: "net_version", params: [])
+    static func getNetworkID(providerURL: String, networking: NetworkingLayer) throws -> String {
+        let url = URL(string: providerURL)!
+        let payload = JsonRpcPayload(jsonrpc: "2.0", id: "67", method: "net_version", params: [])
 
         var resp: JsonRpcResponseArray?
         var err: Error?
@@ -211,8 +214,8 @@ extension CommonNamingService {
     }
 }
 
-fileprivate extension Dictionary where Value: Equatable {
-    func key(forValue value: Value) -> Key? {
-        return first { $0.1 == value }?.0
+extension Dictionary where Value: Equatable {
+    fileprivate func key(forValue value: Value) -> Key? {
+        first { $0.1 == value }?.0
     }
 }

@@ -7,26 +7,30 @@
 
 import Foundation
 
+// MARK: - DnsRecord
+
 public struct DnsRecord: Equatable {
     var ttl: Int
     var type: String
     var data: String
 
-    static public func == (lhs: DnsRecord, rhs: DnsRecord) -> Bool {
-        return lhs.ttl == rhs.ttl && lhs.type == rhs.type && lhs.data == rhs.data
+    public static func == (lhs: DnsRecord, rhs: DnsRecord) -> Bool {
+        lhs.ttl == rhs.ttl && lhs.type == rhs.type && lhs.data == rhs.data
     }
 }
 
-public class DnsUtils {
-    init() {}
+// MARK: - DnsUtils
 
-    static let DefaultTtl: Int = 300
+public class DnsUtils {
+    init() { }
+
+    static let DefaultTtl = 300
 
     public func toList(map: [String: String]) throws -> [DnsRecord] {
-        let dnsTypes = self.getAllDnsTypes(map: map)
+        let dnsTypes = getAllDnsTypes(map: map)
         var recordList: [DnsRecord] = []
         for type in dnsTypes {
-            recordList += try self.constructDnsRecord(map: map, type: type)
+            recordList += try constructDnsRecord(map: map, type: type)
         }
         return recordList
     }
@@ -34,17 +38,17 @@ public class DnsUtils {
     public func toMap(records: [DnsRecord]) throws -> [String: String] {
         var map: [String: String] = [:]
         for record in records {
-
-            if let ttlInMap = map["dns.\(record.type).ttl"],
-               let ttl = Int(ttlInMap) {
-
+            if
+                let ttlInMap = map["dns.\(record.type).ttl"],
+                let ttl = Int(ttlInMap)
+            {
                 guard ttl == record.ttl else {
                     throw DnsRecordsError.inconsistentTtl(recordType: DnsType(rawValue: record.type)!)
                 }
             }
 
             guard let dnsArrayInMap: String = map["dns.\(record.type)"] else {
-                map["dns.\(record.type)"] = self.toJsonString(from: [record.data])
+                map["dns.\(record.type)"] = toJsonString(from: [record.data])
                 map["dns.\(record.type).ttl"] = String(record.ttl)
                 continue
             }
@@ -57,12 +61,12 @@ public class DnsUtils {
 
     private func constructDnsRecord(map: [String: String], type: DnsType) throws -> [DnsRecord] {
         var dnsRecords: [DnsRecord] = []
-        let ttl: Int = self.parseTtl(map: map, type: type)
+        let ttl: Int = parseTtl(map: map, type: type)
         guard let jsonValueString: String = map["dns.\(type)"] else {
             return []
         }
         do {
-            let recordDataArray = try self.toStringArray(fromJsonString: jsonValueString)
+            let recordDataArray = try toStringArray(fromJsonString: jsonValueString)
             for record in recordDataArray {
                 dnsRecords.append(DnsRecord(ttl: ttl, type: "\(type)", data: record))
             }
@@ -76,7 +80,7 @@ public class DnsUtils {
         var types: Set<DnsType> = []
         for (key, _) in map {
             let chunks: [String] = key.components(separatedBy: ".")
-            if chunks.count >= 1 && chunks[1] != "ttl" {
+            if chunks.count >= 1, chunks[1] != "ttl" {
                 if let type = DnsType(rawValue: chunks[1]) {
                     types.insert(type)
                 }

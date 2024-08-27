@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - JsonRpcPayload
+
 public struct JsonRpcPayload: Codable {
     let jsonrpc, id, method: String
     let params: [ParamElement]
@@ -25,16 +27,20 @@ public struct JsonRpcPayload: Codable {
         self.params = params
     }
 
-    init (id: String, data: String, to address: String) {
-        self.init(jsonrpc: "2.0",
-                  id: id,
-                  method: "eth_call",
-                  params: [
-                    ParamElement.paramClass(ParamClass(data: data, to: address)),
-                    ParamElement.string("latest")
-                  ])
+    init(id: String, data: String, to address: String) {
+        self.init(
+            jsonrpc: "2.0",
+            id: id,
+            method: "eth_call",
+            params: [
+                ParamElement.paramClass(ParamClass(data: data, to: address)),
+                ParamElement.string("latest"),
+            ]
+        )
     }
 }
+
+// MARK: - ParamElement
 
 public enum ParamElement: Codable {
     case paramClass(ParamClass)
@@ -52,7 +58,7 @@ public enum ParamElement: Codable {
             self = .paramClass(elem)
             return
         }
-        if let elem = try? container.decode(Array<ParamElement>.self) {
+        if let elem = try? container.decode([ParamElement].self) {
             self = .array(elem)
             return
         }
@@ -61,10 +67,12 @@ public enum ParamElement: Codable {
             return
         }
 
-        throw DecodingError.typeMismatch(ParamElement.self,
-                                         DecodingError.Context(
-                                            codingPath: decoder.codingPath,
-                                            debugDescription: "Wrong type for ParamElement")
+        throw DecodingError.typeMismatch(
+            ParamElement.self,
+            DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Wrong type for ParamElement"
+            )
         )
     }
 
@@ -83,10 +91,14 @@ public enum ParamElement: Codable {
     }
 }
 
+// MARK: - ParamClass
+
 public struct ParamClass: Codable {
     let data: String
     let to: String
 }
+
+// MARK: - JsonRpcResponse
 
 public struct JsonRpcResponse: Decodable {
     let jsonrpc: String

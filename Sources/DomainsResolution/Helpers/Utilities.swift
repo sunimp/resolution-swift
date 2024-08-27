@@ -7,27 +7,32 @@
 
 import Foundation
 
-internal class Utillities {
+// MARK: - Utillities
+
+class Utillities {
     static func isNotEmpty(_ value: String?) -> Bool {
-        guard let value = value else { return false }
+        guard let value else { return false }
         return Self.isNotEmpty(value)
     }
 
     static func isNotEmpty(_ value: String) -> Bool {
         let nullValues = [
-        "0",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
+            "0",
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
         ]
         return !(value.isEmpty || nullValues.contains(value))
     }
 
     static func isNotEmpty(_ array: [Any]) -> Bool {
-        return array.count > 0
+        !array.isEmpty
     }
 
-    static func getLayerResultWrapper<T>(from results: [UNSLocation: AsyncConsumer<T>], for location: UNSLocation) -> AsyncConsumer<T> {
-        return results[location] ?? (nil, nil)
+    static func getLayerResultWrapper<T>(
+        from results: [UNSLocation: AsyncConsumer<T>],
+        for location: UNSLocation
+    ) -> AsyncConsumer<T> {
+        results[location] ?? (nil, nil)
     }
 
     static func getLayerResult<T>(from results: [UNSLocation: AsyncConsumer<T>], for location: UNSLocation) -> T {
@@ -36,7 +41,7 @@ internal class Utillities {
     }
     
     static func isUnregisteredDomain(error: Error?) -> Bool {
-        return isResolutionError(expected: ResolutionError.unregisteredDomain, error: error)
+        isResolutionError(expected: ResolutionError.unregisteredDomain, error: error)
     }
     
     static func isResolutionError(expected: ResolutionError, error: Error?) -> Bool {
@@ -57,7 +62,7 @@ extension String {
     }
 
     func addHexPrefix() -> String {
-        if !self.hasPrefix("0x") {
+        if !hasPrefix("0x") {
             return "0x" + self
         }
         return self

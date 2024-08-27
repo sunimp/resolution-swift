@@ -13,6 +13,8 @@ import XCTest
 @testable import Resolution
 #endif
 
+// MARK: - TestHelpers
+
 class TestHelpers {
 
 
@@ -37,15 +39,14 @@ class TestHelpers {
         .UNREGISTERED_DOMAIN: "unregistered.crypto",
         .UNREGISTERED_ZIL: "unregistered.zil",
         .ZIL_DOMAIN: "test-udtesting-654.zil",
-        .LAYER2_DOMAIN: "udtestdev-test-l2-domain-784391.wallet"
-
+        .LAYER2_DOMAIN: "udtestdev-test-l2-domain-784391.wallet",
     ]
 
     static func getTestDomain(_ type: DOMAINS) -> String {
-        return Self.TEST_DOMAINS[type]!;
+        Self.TEST_DOMAINS[type]!
     }
 
-    static func checkError(completion: @escaping() throws -> Void, expectedError: ResolutionError) {
+    static func checkError(completion: @escaping () throws -> Void, expectedError: ResolutionError) {
         do {
             try completion()
             XCTFail("Expected \(expectedError), but got none")
@@ -69,47 +70,48 @@ class TestHelpers {
     }
 }
 
+// MARK: - ResolutionError + Equatable
+
 extension ResolutionError: Equatable {
     public static func == (lhs: ResolutionError, rhs: ResolutionError) -> Bool {
         switch (lhs, rhs) {
-        case ( .unregisteredDomain, .unregisteredDomain):
-            return true
-        case ( .unsupportedDomain, .unsupportedDomain):
-            return true
-        case ( .recordNotFound, .recordNotFound):
-            return true
-        case ( .recordNotSupported, .recordNotSupported):
-            return true
-        case ( .unsupportedNetwork, .unsupportedNetwork):
-            return true
+        case (.unregisteredDomain, .unregisteredDomain):
+            true
+        case (.unsupportedDomain, .unsupportedDomain):
+            true
+        case (.recordNotFound, .recordNotFound):
+            true
+        case (.recordNotSupported, .recordNotSupported):
+            true
+        case (.unsupportedNetwork, .unsupportedNetwork):
+            true
         case (.unspecifiedResolver, .unspecifiedResolver):
-            return true
+            true
         case (.proxyReaderNonInitialized, .proxyReaderNonInitialized):
-            return true
+            true
         case (.inconsistentDomainArray, .inconsistentDomainArray):
-            return true
+            true
         case (.methodNotSupported, .methodNotSupported):
-            return true
+            true
         case (.tooManyResponses, .tooManyResponses):
-            return true
+            true
         case (.badRequestOrResponse, .badRequestOrResponse):
-            return true
+            true
         case (.unsupportedServiceName, .unsupportedServiceName):
-            return true
+            true
         case (.registryAddressIsNotProvided, .registryAddressIsNotProvided):
-            return true
+            true
         case (.invalidDomainName, .invalidDomainName):
-            return true
+            true
         case (.reverseResolutionNotSpecified, .reverseResolutionNotSpecified):
-            return true
-
+            true
         case (.unregisteredDomain, _),
              (.unsupportedDomain, _),
              (.recordNotFound, _),
              (.recordNotSupported, _),
              (.unsupportedNetwork, _),
              (.unspecifiedResolver, _),
-             (.unknownError, _ ),
+             (.unknownError, _),
              (.inconsistentDomainArray, _),
              (.methodNotSupported, _),
              (.proxyReaderNonInitialized, _),
@@ -119,11 +121,11 @@ extension ResolutionError: Equatable {
              (.registryAddressIsNotProvided, _),
              (.invalidDomainName, _):
 
-            return false
+            false
         // Xcode with Version 12.4 (12D4e) can't compile this without default
         // throws error: The compiler is unable to check that this switch is exhaustive in a reasonable time
         default:
-            return false
+            false
         }
     }
 }

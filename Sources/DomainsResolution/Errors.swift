@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - ResolutionError
+
 public enum ResolutionError: Error {
     case unregisteredDomain
     case unsupportedDomain
@@ -33,7 +35,7 @@ public enum ResolutionError: Error {
     static let tooManyResponsesCode = -32005
     static let badRequestOrResponseCode = -32042
 
-    static func parse (errorResponse: NetworkErrorResponse) -> ResolutionError? {
+    static func parse(errorResponse: NetworkErrorResponse) -> ResolutionError? {
         let error = errorResponse.error
 
         if error.message.starts(with: "execution reverted") {
@@ -51,13 +53,17 @@ public enum ResolutionError: Error {
     }
 }
 
+// MARK: - NetworkErrorResponse
+
 struct NetworkErrorResponse: Decodable {
     var jsonrpc: String
     var id: String
-    var error: ErrorId
+    var error: ErrorID
 }
 
-struct ErrorId: Codable {
+// MARK: - ErrorID
+
+struct ErrorID: Codable {
     var code: Int
     var message: String
     var data: String?

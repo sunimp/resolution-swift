@@ -16,12 +16,16 @@ public typealias DnsRecordsResultConsumer = (Result<[DnsRecord], Error>) -> Void
 public typealias TokenUriMetadataResultConsumer = (Result<TokenUriMetadata, ResolutionError>) -> Void
 public typealias BoolResultConsumer = (Result<Bool, Error>) -> Void
 
-internal typealias AsyncConsumer<T> = (T?, Error?)
+typealias AsyncConsumer<T> = (T?, Error?)
+
+// MARK: - NamingServiceName
 
 public enum NamingServiceName: String {
     case uns
     case zns
 }
+
+// MARK: - UNSLocation
 
 public enum UNSLocation: String {
     case layer1
@@ -29,16 +33,20 @@ public enum UNSLocation: String {
     case znsLayer
 }
 
+// MARK: - UNSContract
+
 public struct UNSContract {
     let name: String
     let contract: Contract
     let deploymentBlock: String
 }
 
+// MARK: - Location
+
 public struct Location: Equatable {
     var registryAddress: String?
     var resolverAddress: String?
-    var networkId: String?
+    var networkID: String?
     var blockchain: String?
     var owner: String?
     var providerURL: String?

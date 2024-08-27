@@ -14,7 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.8.3")),
-        .package(url: "https://github.com/attaswift/BigInt.git", from: "5.0.0")
+        .package(url: "https://github.com/attaswift/BigInt.git", from: "5.0.0"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat.git", from: "0.54.0"),
     ],
     targets: [
         .target(

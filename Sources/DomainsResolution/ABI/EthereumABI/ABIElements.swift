@@ -5,26 +5,26 @@
 //  Created by Sun on 2024/8/21.
 //
 
-import Foundation
 import BigInt
+import Foundation
 
 // swiftlint:disable nesting cyclomatic_complexity function_body_length
-public extension ABI {
-    // JSON Decoding
-    struct Input: Decodable {
+extension ABI {
+    /// JSON Decoding
+    public struct Input: Decodable {
         public var name: String?
         public var type: String
         public var indexed: Bool?
         public var components: [Input]?
     }
 
-    struct Output: Decodable {
+    public struct Output: Decodable {
         public var name: String?
         public var type: String
         public var components: [Output]?
     }
 
-    struct Record: Decodable {
+    public struct Record: Decodable {
         public var name: String?
         public var type: String?
         public var payable: Bool?
@@ -35,7 +35,7 @@ public extension ABI {
         public var anonymous: Bool?
     }
 
-    enum Element {
+    public enum Element {
         public enum ArraySize { // bytes for convenience
             case staticSize(UInt64)
             case dynamicSize
@@ -56,20 +56,20 @@ public extension ABI {
             var isConstant: Bool {
                 switch self {
                 case .payable:
-                    return false
+                    false
                 case .mutating:
-                    return false
+                    false
                 default:
-                    return true
+                    true
                 }
             }
 
             var isPayable: Bool {
                 switch self {
                 case .payable:
-                    return true
+                    true
                 default:
-                    return false
+                    false
                 }
             }
         }
@@ -152,17 +152,20 @@ extension ABI.Element {
     public func encodeParameters(_ parameters: [AnyObject]) -> Data? {
         switch self {
         case .constructor(let constructor):
-            guard parameters.count == constructor.inputs.count else {return nil}
-            guard let data = ABIEncoder.encode(types: constructor.inputs, values: parameters) else {return nil}
+            guard parameters.count == constructor.inputs.count else { return nil }
+            guard let data = ABIEncoder.encode(types: constructor.inputs, values: parameters) else { return nil }
             return data
+
         case .event:
             return nil
+
         case .fallback:
             return nil
+
         case .function(let function):
-            guard parameters.count == function.inputs.count else {return nil}
+            guard parameters.count == function.inputs.count else { return nil }
             let signature = function.methodEncoding
-            guard let data = ABIEncoder.encode(types: function.inputs, values: parameters) else {return nil}
+            guard let data = ABIEncoder.encode(types: function.inputs, values: parameters) else { return nil }
             return signature + data
         }
     }
@@ -178,7 +181,7 @@ extension ABI.Element {
         case .fallback:
             return nil
         case .function(let function):
-            if data.count == 0 && function.outputs.count == 1 {
+            if data.isEmpty, function.outputs.count == 1 {
                 let name = "0"
                 let value = function.outputs[0].type.emptyValue
                 var returnArray = [String: Any]()
@@ -189,10 +192,10 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.outputs.count*32 <= data.count else {return nil}
+            guard function.outputs.count * 32 <= data.count else { return nil }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.outputs, data: data) else {return nil}
+            guard let values = ABIDecoder.decode(types: function.outputs, data: data) else { return nil }
             for output in function.outputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]
@@ -211,15 +214,17 @@ extension ABI.Element {
         switch rawData.count % 32 {
         case 0:
             break
+
         case 4:
             sig = rawData[0 ..< 4]
             data = Data(rawData[4 ..< rawData.count])
+
         default:
             return nil
         }
         switch self {
         case .constructor(let function):
-            if data.count == 0 && function.inputs.count == 1 {
+            if data.isEmpty, function.inputs.count == 1 {
                 let name = "0"
                 let value = function.inputs[0].type.emptyValue
                 var returnArray = [String: Any]()
@@ -230,10 +235,10 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.inputs.count*32 <= data.count else {return nil}
+            guard function.inputs.count * 32 <= data.count else { return nil }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else {return nil}
+            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else { return nil }
             for input in function.inputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]
@@ -243,15 +248,18 @@ extension ABI.Element {
                 i += 1
             }
             return returnArray
+
         case .event:
             return nil
+
         case .fallback:
             return nil
+
         case .function(let function):
-            if sig != nil && sig != function.methodEncoding {
+            if sig != nil, sig != function.methodEncoding {
                 return nil
             }
-            if data.count == 0 && function.inputs.count == 1 {
+            if data.isEmpty, function.inputs.count == 1 {
                 let name = "0"
                 let value = function.inputs[0].type.emptyValue
                 var returnArray = [String: Any]()
@@ -262,10 +270,10 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.inputs.count*32 <= data.count else {return nil}
+            guard function.inputs.count * 32 <= data.count else { return nil }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else {return nil}
+            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else { return nil }
             for input in function.inputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]

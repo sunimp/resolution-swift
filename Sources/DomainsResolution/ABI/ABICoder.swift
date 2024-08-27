@@ -9,23 +9,28 @@ import Foundation
 
 typealias ABIContract = [ABI.Element]
 
+// MARK: - ABICoderError
+
 enum ABICoderError: Error {
     case wrongABIInterfaceForMethod(method: String)
     case couldNotEncode(method: String, args: [Any])
     case couldNotDecode(method: String, value: String)
 }
 
+// MARK: - ABICoder
+
 // swiftlint:disable identifier_name
-internal class ABICoder {
+class ABICoder {
     let abi: ABIContract
 
     private var methods: [String: ABI.Element] {
         var toReturn = [String: ABI.Element]()
-        for m in self.abi {
+        for m in abi {
             switch m {
             case .function(let function):
-                guard let name = function.name else {continue}
+                guard let name = function.name else { continue }
                 toReturn[name] = m
+
             default:
                 continue
             }
@@ -38,8 +43,8 @@ internal class ABICoder {
     }
 
     // MARK: - Decode Block
-    public func decode(_ data: String, from method: String) throws -> Any {
 
+    public func decode(_ data: String, from method: String) throws -> Any {
         if method == "fallback" {
             return [String: Any]()
         }
@@ -58,11 +63,11 @@ internal class ABICoder {
     }
 
     // MARK: - Encode Block
+
     public func encode(method: String, args: [Any]) throws -> String {
+        let argsObjects = args.map({ $0 as AnyObject })
 
-        let argsObjects = args.map({$0 as AnyObject})
-
-        let foundMethod = self.methods.filter { (key, _) -> Bool in
+        let foundMethod = methods.filter { key, _ -> Bool in
             return key == method
         }
         guard foundMethod.count == 1 else {

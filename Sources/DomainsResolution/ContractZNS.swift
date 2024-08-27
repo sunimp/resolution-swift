@@ -7,52 +7,53 @@
 
 import Foundation
 
-internal class ContractZNS {
+class ContractZNS {
     let address: String
-    let providerUrl: String
+    let providerURL: String
     let networking: NetworkingLayer
 
-    init(providerUrl: String, address: String, networking: NetworkingLayer) {
+    init(providerURL: String, address: String, networking: NetworkingLayer) {
         self.address = address
-        self.providerUrl = providerUrl
+        self.providerURL = providerURL
         self.networking = networking
     }
 
     func fetchSubState(field: String, keys: [String]) throws -> Any {
-
-        let body: JsonRpcPayload = JsonRpcPayload(
+        let body = JsonRpcPayload(
             jsonrpc: "2.0",
             id: "1",
             method: "GetSmartContractSubState",
             params: [
-                ParamElement.string(self.address),
+                ParamElement.string(address),
                 ParamElement.string(field),
-                ParamElement.array(keys.map { ParamElement.string($0) })
+                ParamElement.array(keys.map { ParamElement.string($0) }),
             ]
         )
         do {
             let response = try postRequest(body)!
 
-            guard case let ParamElement.dictionary(dict) = response,
-                let results = self.reduce(dict: dict)[field] as? [String: Any] else {
-                 print("Invalid response, can't process")
-                 return response
+            guard
+                case ParamElement.dictionary(let dict) = response,
+                let results = reduce(dict: dict)[field] as? [String: Any]
+            else {
+                print("Invalid response, can't process")
+                return response
             }
 
             return results
-        // Zilliqa returns null if the domain is not registered,
-        // this causes our decoder to fail and throw APIError.decodingError
+            // Zilliqa returns null if the domain is not registered,
+            // this causes our decoder to fail and throw APIError.decodingError
         } catch APIError.decodingError {
-                throw ResolutionError.unregisteredDomain
+            throw ResolutionError.unregisteredDomain
         }
     }
 
     private func postRequest(_ body: JsonRpcPayload) throws -> Any? {
-        let postRequest = APIRequest(providerUrl, networking: networking)
-        var resp: JsonRpcResponse?
-        var err: Error?
+        let postRequest = APIRequest(providerURL, networking: networking)
+        var resp: JsonRpcResponse? = nil
+        var err: Error? = nil
         let semaphore = DispatchSemaphore(value: 0)
-        try postRequest.post(body, completion: {result in
+        try postRequest.post(body, completion: { result in
             switch result {
             case .success(let response):
                 resp = response[0]
@@ -71,7 +72,7 @@ internal class ContractZNS {
     // MARK: - PRIVATE Helper functions
 
     private func reduce(dict: [String: ParamElement]) -> [String: Any] {
-        return dict.reduce(into: [String: Any]()) { dict, pair in
+        dict.reduce(into: [String: Any]()) { dict, pair in
             let (key, value) = pair
 
             switch value {
@@ -88,7 +89,7 @@ internal class ContractZNS {
     }
 
     private func map(array: [ParamElement]) -> [Any] {
-        return array.map { (value) -> Any in
+        array.map { value -> Any in
             switch value {
             case .paramClass(let elem):
                 return elem

@@ -7,7 +7,9 @@
 
 import Foundation
 
-internal class UNS: CommonNamingService, NamingService {
+// MARK: - UNS
+
+class UNS: CommonNamingService, NamingService {
     var layer1: UNSLayer!
     var layer2: UNSLayer!
     var znsLayer: ZNS!
@@ -18,150 +20,170 @@ internal class UNS: CommonNamingService, NamingService {
     typealias GeneralFunction<T> = () throws -> T
 
     init(_ config: Configurations) throws {
-        self.asyncResolver = AsyncResolver()
+        asyncResolver = AsyncResolver()
         super.init(
             name: Self.name,
-            providerUrl: config.uns.layer1.providerUrl,
+            providerURL: config.uns.layer1.providerURL,
             networking: config.uns.layer1.networking
         )
         let layer1Contracts = try parseContractAddresses(config: config.uns.layer1)
         let layer2Contracts = try parseContractAddresses(config: config.uns.layer2)
 
-        self.layer1 = try UNSLayer(name: .layer1, config: config.uns.layer1, contracts: layer1Contracts)
-        self.layer2 = try UNSLayer(name: .layer2, config: config.uns.layer2, contracts: layer2Contracts)
-        self.znsLayer = try ZNS(config.uns.znsLayer)
+        layer1 = try UNSLayer(name: .layer1, config: config.uns.layer1, contracts: layer1Contracts)
+        layer2 = try UNSLayer(name: .layer2, config: config.uns.layer2, contracts: layer2Contracts)
+        znsLayer = try ZNS(config.uns.znsLayer)
         
-        guard self.layer1 != nil, self.layer2 != nil, self.znsLayer != nil else {
+        guard layer1 != nil, layer2 != nil, znsLayer != nil else {
             throw ResolutionError.proxyReaderNonInitialized
         }
     }
 
     func isSupported(domain: String) -> Bool {
-        return layer2.isSupported(domain: domain)
+        layer2.isSupported(domain: domain)
     }
         
     func owner(domain: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.owner(domain: domain)},
-                         {try self.layer2.owner(domain: domain)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.owner(domain: domain)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.owner(domain: domain) },
+                { try self.layer2.owner(domain: domain) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.owner(domain: domain)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func record(domain: String, key: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.record(domain: domain, key: key)},
-                         {try self.layer2.record(domain: domain, key: key)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.record(domain: domain, key: key)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.record(domain: domain, key: key) },
+                { try self.layer2.record(domain: domain, key: key) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.record(domain: domain, key: key)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func records(keys: [String], for domain: String) throws -> [String: String] {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.records(keys: keys, for: domain)},
-                         {try self.layer2.records(keys: keys, for: domain)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.records(keys: keys, for: domain)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.records(keys: keys, for: domain) },
+                { try self.layer2.records(keys: keys, for: domain) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.records(keys: keys, for: domain)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func allRecords(domain: String) throws -> [String: String] {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.allRecords(domain: domain)},
-                         {try self.layer2.allRecords(domain: domain)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.allRecords(domain: domain)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.allRecords(domain: domain) },
+                { try self.layer2.allRecords(domain: domain) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.allRecords(domain: domain)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
-    func getTokenUri(tokenId: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.getTokenUri(tokenId: tokenId)},
-                         {try self.layer2.getTokenUri(tokenId: tokenId)}]
+    func getTokenUri(tokenID: String) throws -> String {
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.getTokenUri(tokenID: tokenID) },
+                { try self.layer2.getTokenUri(tokenID: tokenID) },
+            ]
         )
     }
 
-    func getDomainName(tokenId: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.getDomainName(tokenId: tokenId)},
-                         {try self.layer2.getDomainName(tokenId: tokenId)}]
+    func getDomainName(tokenID: String) throws -> String {
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.getDomainName(tokenID: tokenID) },
+                { try self.layer2.getDomainName(tokenID: tokenID) },
+            ]
         )
     }
 
     func addr(domain: String, ticker: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.addr(domain: domain, ticker: ticker)},
-                         {try self.layer2.addr(domain: domain, ticker: ticker)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.addr(domain: domain, ticker: ticker)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.addr(domain: domain, ticker: ticker) },
+                { try self.layer2.addr(domain: domain, ticker: ticker) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.addr(domain: domain, ticker: ticker)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func addr(domain: String, network: String, token: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.addr(domain: domain, network: network, token: token)},
-                         {try self.layer2.addr(domain: domain, network: network, token: token)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.addr(domain: domain, network: network, token: token)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.addr(domain: domain, network: network, token: token) },
+                { try self.layer2.addr(domain: domain, network: network, token: token) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.addr(domain: domain, network: network, token: token)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func resolver(domain: String) throws -> String {
-        return try asyncResolver.safeResolve(
-            listOfFunc: [{try self.layer1.resolver(domain: domain)},
-                         {try self.layer2.resolver(domain: domain)},
-                         {
-                             if self.znsLayer.isSupported(domain: domain) {
-                                 return try self.znsLayer.resolver(domain: domain)
-                             }
-                             throw ResolutionError.unregisteredDomain
-                         }]
+        try asyncResolver.safeResolve(
+            listOfFunc: [
+                { try self.layer1.resolver(domain: domain) },
+                { try self.layer2.resolver(domain: domain) },
+                {
+                    if self.znsLayer.isSupported(domain: domain) {
+                        return try self.znsLayer.resolver(domain: domain)
+                    }
+                    throw ResolutionError.unregisteredDomain
+                },
+            ]
         )
     }
 
     func locations(domains: [String]) throws -> [String: Location] {
         let results = try asyncResolver.resolve(
-            listOfFunc: [{try self.layer1.locations(domains: domains)},
-                         {try self.layer2.locations(domains: domains)}]
+            listOfFunc: [
+                { try self.layer1.locations(domains: domains) },
+                { try self.layer2.locations(domains: domains) },
+            ]
         )
         
-        try self.throwIfLayerHasError(results)
+        try throwIfLayerHasError(results)
 
         var locations: [String: Location] = [:]
         let l2Response = Utillities.getLayerResult(from: results, for: .layer2)
         let l1Response = Utillities.getLayerResult(from: results, for: .layer1)
 
-        domains.forEach {
-            let l2Loc = l2Response[$0]!
-            let l1Loc = l1Response[$0]!
+        for domain in domains {
+            let l2Loc = l2Response[domain]!
+            let l1Loc = l1Response[domain]!
 
-            locations[$0] = l2Loc.owner == nil ? l1Loc : l2Loc
+            locations[domain] = l2Loc.owner == nil ? l1Loc : l2Loc
         }
 
         return locations
@@ -169,13 +191,14 @@ internal class UNS: CommonNamingService, NamingService {
 
     func batchOwners(domains: [String]) throws -> [String: String?] {
         let results = try asyncResolver.resolve(
-            listOfFunc: [{try self.layer1.batchOwners(domains: domains)},
-                         {try self.layer2.batchOwners(domains: domains)},
-                        ]
+            listOfFunc: [
+                { try self.layer1.batchOwners(domains: domains) },
+                { try self.layer2.batchOwners(domains: domains) },
+            ]
         )
         
         var owners: [String: String?] = [:]
-        try self.throwIfLayerHasError(results)
+        try throwIfLayerHasError(results)
         
         let l2Result = Utillities.getLayerResult(from: results, for: .layer2)
         let l1Result = Utillities.getLayerResult(from: results, for: .layer1)
@@ -187,11 +210,12 @@ internal class UNS: CommonNamingService, NamingService {
         return owners
     }
     
-    func reverseTokenId(address: String, location: UNSLocation?) throws -> String {
+    func reverseTokenID(address: String, location: UNSLocation?) throws -> String {
         let results = try asyncResolver.resolve(
-            listOfFunc: [{try self.layer1.reverseTokenId(address: address)},
-                         {try self.layer2.reverseTokenId(address: address)},
-                        ]
+            listOfFunc: [
+                { try self.layer1.reverseTokenID(address: address) },
+                { try self.layer2.reverseTokenID(address: address) },
+            ]
         )
         
         if location != nil {
@@ -227,17 +251,25 @@ internal class UNS: CommonNamingService, NamingService {
         var cnsContract: UNSContract?
 
         let network = config.network.isEmpty
-            ? try Self.getNetworkId(providerUrl: config.providerUrl, networking: config.networking)
+            ? try Self.getNetworkID(providerURL: config.providerURL, networking: config.networking)
             : config.network
 
         if let contractsContainer = try Self.parseContractAddresses(network: network) {
-            unsContract = try getUNSContract(contracts: contractsContainer, type: .unsRegistry, providerUrl: config.providerUrl)
-            cnsContract = try getUNSContract(contracts: contractsContainer, type: .cnsRegistry, providerUrl: config.providerUrl)
-            proxyReaderContract = try getUNSContract(contracts: contractsContainer, type: .proxyReader, providerUrl: config.providerUrl)
+            unsContract = try getUNSContract(contracts: contractsContainer, type: .unsRegistry, providerURL: config.providerURL)
+            cnsContract = try getUNSContract(contracts: contractsContainer, type: .cnsRegistry, providerURL: config.providerURL)
+            proxyReaderContract = try getUNSContract(
+                contracts: contractsContainer,
+                type: .proxyReader,
+                providerURL: config.providerURL
+            )
         }
 
         if config.proxyReader != nil {
-            let contract = try super.buildContract(address: config.proxyReader!, type: .proxyReader, providerUrl: config.providerUrl)
+            let contract = try super.buildContract(
+                address: config.proxyReader!,
+                type: .proxyReader,
+                providerURL: config.providerURL
+            )
             proxyReaderContract = UNSContract(name: "ProxyReader", contract: contract, deploymentBlock: "earliest")
         }
 
@@ -245,9 +277,9 @@ internal class UNS: CommonNamingService, NamingService {
             throw ResolutionError.proxyReaderNonInitialized
         }
         contracts.append(proxyReaderContract!)
-        if config.registryAddresses != nil && !config.registryAddresses!.isEmpty {
+        if config.registryAddresses != nil, !config.registryAddresses!.isEmpty {
             try config.registryAddresses!.forEach {
-                let contract = try super.buildContract(address: $0, type: .unsRegistry, providerUrl: config.providerUrl)
+                let contract = try super.buildContract(address: $0, type: .unsRegistry, providerURL: config.providerURL)
                 contracts.append(UNSContract(name: "Registry", contract: contract, deploymentBlock: "earliest"))
             }
         }
@@ -267,16 +299,20 @@ internal class UNS: CommonNamingService, NamingService {
         return contracts
     }
 
-    private func getUNSContract(contracts: [String: CommonNamingService.ContractAddressEntry], type: ContractType, providerUrl: String ) throws -> UNSContract? {
+    private func getUNSContract(
+        contracts: [String: CommonNamingService.ContractAddressEntry],
+        type: ContractType,
+        providerURL: String
+    ) throws -> UNSContract? {
         if let address = contracts[type.name]?.address {
-            let contract = try super.buildContract(address: address, type: type, providerUrl: providerUrl)
+            let contract = try super.buildContract(address: address, type: type, providerURL: providerURL)
             let deploymentBlock = contracts[type.name]?.deploymentBlock ?? "earliest"
             return UNSContract(name: type.name, contract: contract, deploymentBlock: deploymentBlock)
         }
         return nil
     }
 
-    // This is used only when all layers should not throw any errors. Methods like batchOwners or locations require both layers.
+    /// This is used only when all layers should not throw any errors. Methods like batchOwners or locations require both layers.
     private func throwIfLayerHasError<T>(_ results: [UNSLocation: AsyncConsumer<T>]) throws {
         let l2Results = Utillities.getLayerResultWrapper(from: results, for: .layer2)
         let l1Results = Utillities.getLayerResultWrapper(from: results, for: .layer1)
@@ -293,12 +329,11 @@ internal class UNS: CommonNamingService, NamingService {
         guard zResults.1 == nil else {
             throw zResults.1!
         }
-
     }
 }
 
-fileprivate extension Sequence where Element: Hashable {
-    func uniqued() -> [Element] {
+extension Sequence where Element: Hashable {
+    fileprivate func uniqued() -> [Element] {
         var set = Set<Element>()
         return filter { set.insert($0).inserted }
     }

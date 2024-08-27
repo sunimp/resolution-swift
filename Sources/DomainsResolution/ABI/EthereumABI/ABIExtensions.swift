@@ -5,35 +5,35 @@
 //  Created by Sun on 2024/8/21.
 //
 
-import Foundation
 import BigInt
+import Foundation
 
 extension Data {
-    func setLengthLeft(_ toBytes: UInt64, isNegative: Bool = false ) -> Data? {
-        let existingLength = UInt64(self.count)
+    func setLengthLeft(_ toBytes: UInt64, isNegative: Bool = false) -> Data? {
+        let existingLength = UInt64(count)
         if existingLength == toBytes {
             return Data(self)
         } else if existingLength > toBytes {
             return nil
         }
-        var data: Data
-        if isNegative {
-            data = Data(repeating: UInt8(255), count: Int(toBytes - existingLength))
-        } else {
-            data = Data(repeating: UInt8(0), count: Int(toBytes - existingLength))
-        }
+        var data =
+            if isNegative {
+                Data(repeating: UInt8(255), count: Int(toBytes - existingLength))
+            } else {
+                Data(repeating: UInt8(0), count: Int(toBytes - existingLength))
+            }
         data.append(self)
         return data
     }
 
-    func setLengthRight(_ toBytes: UInt64, isNegative: Bool = false ) -> Data? {
-        let existingLength = UInt64(self.count)
+    func setLengthRight(_ toBytes: UInt64, isNegative: Bool = false) -> Data? {
+        let existingLength = UInt64(count)
         if existingLength == toBytes {
             return Data(self)
         } else if existingLength > toBytes {
             return nil
         }
-        var data: Data = Data()
+        var data = Data()
         data.append(self)
         if isNegative {
             data.append(Data(repeating: UInt8(255), count: Int(toBytes - existingLength)))
@@ -46,7 +46,7 @@ extension Data {
     static func fromHex(_ hex: String) -> Data? {
         let string = hex.lowercased().stripHexPrefix()
         let array = [UInt8](hex: string)
-        if array.count == 0 {
+        if array.isEmpty {
             if hex == "0x" || hex == "" {
                 return Data()
             } else {
@@ -59,12 +59,12 @@ extension Data {
 
 extension BigInt {
     func toTwosComplement() -> Data {
-        if self.sign == BigInt.Sign.plus {
-            return self.magnitude.serialize()
+        if sign == BigInt.Sign.plus {
+            return magnitude.serialize()
         } else {
-            let serializedLength = self.magnitude.serialize().count
-            let MAX = BigUInt(1) << (serializedLength*8)
-            let twoComplement = MAX - self.magnitude
+            let serializedLength = magnitude.serialize().count
+            let MAX = BigUInt(1) << (serializedLength * 8)
+            let twoComplement = MAX - magnitude
             return twoComplement.serialize()
         }
     }
@@ -72,7 +72,7 @@ extension BigInt {
 
 extension BigUInt {
     func abiEncode(bits: UInt64) -> Data? {
-        let data = self.serialize()
+        let data = serialize()
         let paddedLength = UInt64((bits + 7) / 8)
         let padded = data.setLengthLeft(paddedLength)
         return padded
@@ -81,8 +81,8 @@ extension BigUInt {
 
 extension BigInt {
     func abiEncode(bits: UInt64) -> Data? {
-        let isNegative = self < (BigInt(0))
-        let data = self.toTwosComplement()
+        let isNegative = self < BigInt(0)
+        let data = toTwosComplement()
         let paddedLength = UInt64((bits + 7) / 8)
         let padded = data.setLengthLeft(paddedLength, isNegative: isNegative)
         return padded
@@ -96,7 +96,7 @@ extension BigInt {
             let magnitude = BigUInt(data)
             return BigInt(magnitude)
         } else {
-            let MAX = (BigUInt(1) << (data.count*8))
+            let MAX = (BigUInt(1) << (data.count * 8))
             let magnitude = MAX - BigUInt(data)
             let bigint = BigInt(0) - BigInt(magnitude)
             return bigint
@@ -106,11 +106,11 @@ extension BigInt {
 
 extension String {
     var fullRange: Range<Index> {
-        return startIndex..<endIndex
+        startIndex ..< endIndex
     }
 
     var fullNSRange: NSRange {
-        return NSRange(fullRange, in: self)
+        NSRange(fullRange, in: self)
     }
 
     func index(of char: Character) -> Index? {
@@ -120,40 +120,40 @@ extension String {
         return range.lowerBound
     }
 
-    subscript (bounds: CountableClosedRange<Int>) -> String {
-        let start = index(self.startIndex, offsetBy: bounds.lowerBound)
-        let end = index(self.startIndex, offsetBy: bounds.upperBound)
-        return String(self[start...end])
+    subscript(bounds: CountableClosedRange<Int>) -> String {
+        let start = index(startIndex, offsetBy: bounds.lowerBound)
+        let end = index(startIndex, offsetBy: bounds.upperBound)
+        return String(self[start ... end])
     }
 
-    subscript (bounds: CountableRange<Int>) -> String {
-        let start = index(self.startIndex, offsetBy: bounds.lowerBound)
-        let end = index(self.startIndex, offsetBy: bounds.upperBound)
-        return String(self[start..<end])
+    subscript(bounds: CountableRange<Int>) -> String {
+        let start = index(startIndex, offsetBy: bounds.lowerBound)
+        let end = index(startIndex, offsetBy: bounds.upperBound)
+        return String(self[start ..< end])
     }
 
-    subscript (bounds: CountablePartialRangeFrom<Int>) -> String {
-        let start = index(self.startIndex, offsetBy: bounds.lowerBound)
-        let end = self.endIndex
-        return String(self[start..<end])
+    subscript(bounds: CountablePartialRangeFrom<Int>) -> String {
+        let start = index(startIndex, offsetBy: bounds.lowerBound)
+        let end = endIndex
+        return String(self[start ..< end])
     }
 
     func leftPadding(toLength: Int, withPad character: Character) -> String {
-        let stringLength = self.count
+        let stringLength = count
         if stringLength < toLength {
             return String(repeatElement(character, count: toLength - stringLength)) + self
         } else {
-            return String(self.suffix(toLength))
+            return String(suffix(toLength))
         }
     }
 
     func hasHexPrefix() -> Bool {
-        return self.hasPrefix("0x")
+        hasPrefix("0x")
     }
 
     func stripHexPrefix() -> String {
-        if self.hasPrefix("0x") {
-            let indexStart = self.index(self.startIndex, offsetBy: 2)
+        if hasPrefix("0x") {
+            let indexStart = index(startIndex, offsetBy: 2)
             return String(self[indexStart...])
         }
         return self
@@ -162,9 +162,9 @@ extension String {
     func matchingStrings(regex: String) -> [[String]] {
         guard let regex = try? NSRegularExpression(pattern: regex, options: []) else { return [] }
         let nsString = self as NSString
-        let results  = regex.matches(in: self, options: [], range: NSRange(location: 0, length: nsString.length))
+        let results = regex.matches(in: self, options: [], range: NSRange(location: 0, length: nsString.length))
         return results.map { result in
-            (0..<result.numberOfRanges).map { result.range(at: $0).location != NSNotFound
+            (0 ..< result.numberOfRanges).map { result.range(at: $0).location != NSNotFound
                 ? nsString.substring(with: result.range(at: $0))
                 : ""
             }
@@ -177,12 +177,12 @@ extension String {
             let to16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location + nsRange.length, limitedBy: utf16.endIndex),
             let from = from16.samePosition(in: self),
             let to = to16.samePosition(in: self)
-            else { return nil }
+        else { return nil }
         return from ..< to
     }
 
     var asciiValue: Int {
-        let s = self.unicodeScalars
+        let s = unicodeScalars
         return Int(s[s.startIndex].value)
     }
 }
@@ -194,23 +194,23 @@ extension Character {
     }
 }
 
-extension Array where Element == UInt8 {
+extension [UInt8] {
     init(hex: String) {
         self.init()
-        self.reserveCapacity(hex.unicodeScalars.lazy.underestimatedCount)
-        var buffer: UInt8?
+        reserveCapacity(hex.unicodeScalars.lazy.underestimatedCount)
+        var buffer: UInt8? = nil
         var skip = hex.hasPrefix("0x") ? 2 : 0
         for char in hex.unicodeScalars.lazy {
             guard skip == 0 else {
                 skip -= 1
                 continue
             }
-            guard char.value >= 48 && char.value <= 102 else {
+            guard char.value >= 48, char.value <= 102 else {
                 removeAll()
                 return
             }
             let v: UInt8
-            let c: UInt8 = UInt8(char.value)
+            let c = UInt8(char.value)
             switch c {
             case let c where c <= 57:
                 v = c - 48
@@ -235,7 +235,7 @@ extension Array where Element == UInt8 {
     }
 
     func toHexString() -> String {
-        return `lazy`.reduce("") {
+        `lazy`.reduce("") {
             var s = String($1, radix: 16)
             if s.count == 1 {
                 s = "0" + s

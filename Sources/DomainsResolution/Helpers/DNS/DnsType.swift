@@ -65,9 +65,9 @@ public enum DnsType: String {
         }
         for type in types {
             if ttl {
-                cryptoRecords.append(self.getCryptoRecord(type: type, with: ttl))
+                cryptoRecords.append(getCryptoRecord(type: type, with: ttl))
             }
-            cryptoRecords.append(self.getCryptoRecord(type: type))
+            cryptoRecords.append(getCryptoRecord(type: type))
         }
         return cryptoRecords
     }
