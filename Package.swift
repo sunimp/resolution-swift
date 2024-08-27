@@ -5,7 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "DomainsResolution",
-    platforms: [.macOS(.v10_15), .iOS(.v14) ],
+    platforms: [
+        .iOS(.v14),
+        .macOS(.v12)
+    ],
     products: [
         .library(
             name: "DomainsResolution",
