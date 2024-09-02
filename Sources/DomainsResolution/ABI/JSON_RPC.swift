@@ -1,8 +1,7 @@
 //
 //  JSON_RPC.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/20.
 //
 
 import Foundation
@@ -10,8 +9,7 @@ import Foundation
 // MARK: - JsonRpcPayload
 
 public struct JsonRpcPayload: Codable {
-    let jsonrpc, id, method: String
-    let params: [ParamElement]
+    // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
         case jsonrpc
@@ -19,6 +17,13 @@ public struct JsonRpcPayload: Codable {
         case method
         case params
     }
+
+    // MARK: Properties
+
+    let jsonrpc, id, method: String
+    let params: [ParamElement]
+
+    // MARK: Lifecycle
 
     init(jsonrpc: String, id: String, method: String, params: [ParamElement]) {
         self.jsonrpc = jsonrpc
@@ -48,6 +53,8 @@ public enum ParamElement: Codable {
     case array([ParamElement])
     case dictionary([String: ParamElement])
 
+    // MARK: Lifecycle
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let elem = try? container.decode(String.self) {
@@ -76,16 +83,18 @@ public enum ParamElement: Codable {
         )
     }
 
+    // MARK: Functions
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case .paramClass(let elem):
+        case let .paramClass(elem):
             try container.encode(elem)
-        case .string(let elem):
+        case let .string(elem):
             try container.encode(elem)
-        case .array(let array):
+        case let .array(array):
             try container.encode(array)
-        case .dictionary(let dict):
+        case let .dictionary(dict):
             try container.encode(dict)
         }
     }
@@ -101,13 +110,17 @@ public struct ParamClass: Codable {
 // MARK: - JsonRpcResponse
 
 public struct JsonRpcResponse: Decodable {
-    let jsonrpc: String
-    let id: String
-    let result: ParamElement
+    // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
         case jsonrpc
         case id
         case result
     }
+
+    // MARK: Properties
+
+    let jsonrpc: String
+    let id: String
+    let result: ParamElement
 }

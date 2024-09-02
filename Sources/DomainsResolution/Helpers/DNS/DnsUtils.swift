@@ -1,8 +1,7 @@
 //
 //  DnsUtils.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/12/19.
 //
 
 import Foundation
@@ -10,9 +9,13 @@ import Foundation
 // MARK: - DnsRecord
 
 public struct DnsRecord: Equatable {
+    // MARK: Properties
+
     var ttl: Int
     var type: String
     var data: String
+
+    // MARK: Static Functions
 
     public static func == (lhs: DnsRecord, rhs: DnsRecord) -> Bool {
         lhs.ttl == rhs.ttl && lhs.type == rhs.type && lhs.data == rhs.data
@@ -22,9 +25,15 @@ public struct DnsRecord: Equatable {
 // MARK: - DnsUtils
 
 public class DnsUtils {
-    init() { }
+    // MARK: Static Properties
 
     static let DefaultTtl = 300
+
+    // MARK: Lifecycle
+
+    init() { }
+
+    // MARK: Functions
 
     public func toList(map: [String: String]) throws -> [DnsRecord] {
         let dnsTypes = getAllDnsTypes(map: map)
@@ -40,8 +49,7 @@ public class DnsUtils {
         for record in records {
             if
                 let ttlInMap = map["dns.\(record.type).ttl"],
-                let ttl = Int(ttlInMap)
-            {
+                let ttl = Int(ttlInMap) {
                 guard ttl == record.ttl else {
                     throw DnsRecordsError.inconsistentTtl(recordType: DnsType(rawValue: record.type)!)
                 }

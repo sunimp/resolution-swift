@@ -1,10 +1,8 @@
 //
 //  DnsType.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/12/19.
 //
-
 
 // swiftlint:disable identifier_name
 import Foundation
@@ -57,6 +55,8 @@ public enum DnsType: String {
     case TXT
     case URI
     case ZONEMD
+
+    // MARK: Static Functions
 
     static func getCryptoRecords(types: [DnsType], ttl: Bool) -> [String] {
         var cryptoRecords: [String] = []

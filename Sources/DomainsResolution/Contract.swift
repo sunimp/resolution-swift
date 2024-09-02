@@ -1,8 +1,7 @@
 //
 //  Contract.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/13.
 //
 
 // MARK: - IdentifiableResult
@@ -24,17 +23,23 @@ import Foundation
 // MARK: - Contract
 
 class Contract {
-    let batchIDOffset = 128
+    // MARK: Static Properties
 
     static let ownersKey = "owners"
     static let resolversKey = "resolvers"
     static let valuesKey = "values"
     static let multiCallMethodName = "multicall"
 
+    // MARK: Properties
+
+    let batchIDOffset = 128
+
     let address: String
     let providerURL: String
     let coder: ABICoder
     let networking: NetworkingLayer
+
+    // MARK: Lifecycle
 
     init(providerURL: String, address: String, abi: ABIContract, networking: NetworkingLayer) {
         self.address = address
@@ -42,6 +47,8 @@ class Contract {
         coder = ABICoder(abi)
         self.networking = networking
     }
+
+    // MARK: Functions
 
     func multiCall(calls: [MultiCallData]) throws -> [Data] {
         let encodedCalls = try calls.map { try self.coder.encode(method: $0.methodName, args: $0.args) }
@@ -92,7 +99,7 @@ class Contract {
     private func postRequestForString(_ body: JsonRpcPayload) throws -> String? {
         let postResponse = try postRequest(body)
         switch postResponse {
-        case .string(let result):
+        case let .string(result):
             return result
         default:
             return nil
@@ -106,9 +113,9 @@ class Contract {
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(body, completion: { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 resp = response
-            case .failure(let error):
+            case let .failure(error):
                 err = error
             }
             semaphore.signal()
@@ -127,9 +134,9 @@ class Contract {
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(bodyArray, completion: { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 resp = response
-            case .failure(let error):
+            case let .failure(error):
                 err = error
             }
             semaphore.signal()
@@ -139,19 +146,20 @@ class Contract {
             throw err!
         }
 
-        guard let responseArray = resp else { throw APIError.decodingError }
+        guard let responseArray = resp else {
+            throw APIError.decodingError
+        }
 
-        let parsedResponseArray: [IdentifiableResult<String>?] = responseArray.map {
-            if case ParamElement.string(let stringResult) = $0.result {
+        return responseArray.map {
+            if case let ParamElement.string(stringResult) = $0.result {
                 return IdentifiableResult<String>(id: $0.id, result: stringResult)
             }
             return nil
         }
-        return parsedResponseArray
     }
 
     private func stringParamElementToData(_ param: ParamElement?) throws -> Data {
-        guard case .string(let paramString) = param else {
+        guard case let .string(paramString) = param else {
             throw ResolutionError.badRequestOrResponse
         }
         return Data(hex: paramString)

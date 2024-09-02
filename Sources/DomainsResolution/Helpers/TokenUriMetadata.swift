@@ -1,8 +1,7 @@
 //
 //  TokenUriMetadata.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/7/21.
 //
 
 import Foundation
@@ -10,18 +9,7 @@ import Foundation
 // MARK: - TokenUriMetadata
 
 public struct TokenUriMetadata: Codable {
-    let name: String?
-    let tokenID: String?
-    let namehash: String?
-    let description: String?
-    let externalURL: String?
-    let image: String?
-    let attributes: [TokenUriMetadataAttribute]
-    var backgroundColor: String?
-    var animationURL: String?
-    var youtubeURL: String?
-    var externalLink: String?
-    var imageData: String?
+    // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -37,26 +25,49 @@ public struct TokenUriMetadata: Codable {
         case externalLink = "external_link"
         case imageData = "image_data"
     }
+
+    // MARK: Properties
+
+    let name: String?
+    let tokenID: String?
+    let namehash: String?
+    let description: String?
+    let externalURL: String?
+    let image: String?
+    let attributes: [TokenUriMetadataAttribute]
+    var backgroundColor: String?
+    var animationURL: String?
+    var youtubeURL: String?
+    var externalLink: String?
+    var imageData: String?
 }
 
 // MARK: - TokenUriMetadataAttribute
 
 public struct TokenUriMetadataAttribute: Codable {
-    let displayType: String?
-    let traitType: String?
-    let value: TokenUriMetadataValue
+    // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
         case displayType = "display_type"
         case traitType = "trait_type"
         case value
     }
+
+    // MARK: Properties
+
+    let displayType: String?
+    let traitType: String?
+    let value: TokenUriMetadataValue
 }
 
 // MARK: - TokenUriMetadataValue
 
 struct TokenUriMetadataValue: Codable {
+    // MARK: Properties
+
     let value: String
+
+    // MARK: Lifecycle
 
     init(_ value: String) {
         self.value = value
@@ -76,10 +87,15 @@ struct TokenUriMetadataValue: Codable {
         } else {
             throw DecodingError.typeMismatch(
                 String.self,
-                .init(codingPath: decoder.codingPath, debugDescription: "Failed to decode token metadata attribute value.")
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Failed to decode token metadata attribute value."
+                )
             )
         }
     }
+
+    // MARK: Functions
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()

@@ -1,8 +1,7 @@
 //
 //  ABIElements.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/2/16.
 //
 
 import BigInt
@@ -36,22 +35,26 @@ extension ABI {
     }
 
     public enum Element {
+        case function(Function)
+        case constructor(Constructor)
+        case fallback(Fallback)
+        case event(Event)
+
+        // MARK: Nested Types
+
         public enum ArraySize { // bytes for convenience
             case staticSize(UInt64)
             case dynamicSize
             case notArray
         }
 
-        case function(Function)
-        case constructor(Constructor)
-        case fallback(Fallback)
-        case event(Event)
-
         public enum StateMutability {
             case payable
             case mutating
             case view
             case pure
+
+            // MARK: Computed Properties
 
             var isConstant: Bool {
                 switch self {
@@ -75,8 +78,12 @@ extension ABI {
         }
 
         public struct InOut {
+            // MARK: Properties
+
             public let name: String
             public let type: ParameterType
+
+            // MARK: Lifecycle
 
             public init(name: String, type: ParameterType) {
                 self.name = name
@@ -85,12 +92,16 @@ extension ABI {
         }
 
         public struct Function {
+            // MARK: Properties
+
             public let name: String?
             public let inputs: [InOut]
             public let outputs: [InOut]
             public let stateMutability: StateMutability? = nil
             public let constant: Bool
             public let payable: Bool
+
+            // MARK: Lifecycle
 
             public init(name: String?, inputs: [InOut], outputs: [InOut], constant: Bool, payable: Bool) {
                 self.name = name
@@ -102,9 +113,14 @@ extension ABI {
         }
 
         public struct Constructor {
+            // MARK: Properties
+
             public let inputs: [InOut]
             public let constant: Bool
             public let payable: Bool
+
+            // MARK: Lifecycle
+
             public init(inputs: [InOut], constant: Bool, payable: Bool) {
                 self.inputs = inputs
                 self.constant = constant
@@ -113,8 +129,12 @@ extension ABI {
         }
 
         public struct Fallback {
+            // MARK: Properties
+
             public let constant: Bool
             public let payable: Bool
+
+            // MARK: Lifecycle
 
             public init(constant: Bool, payable: Bool) {
                 self.constant = constant
@@ -123,26 +143,36 @@ extension ABI {
         }
 
         public struct Event {
-            public let name: String
-            public let inputs: [Input]
-            public let anonymous: Bool
-
-            public init(name: String, inputs: [Input], anonymous: Bool) {
-                self.name = name
-                self.inputs = inputs
-                self.anonymous = anonymous
-            }
+            // MARK: Nested Types
 
             public struct Input {
+                // MARK: Properties
+
                 public let name: String
                 public let type: ParameterType
                 public let indexed: Bool
+
+                // MARK: Lifecycle
 
                 public init(name: String, type: ParameterType, indexed: Bool) {
                     self.name = name
                     self.type = type
                     self.indexed = indexed
                 }
+            }
+
+            // MARK: Properties
+
+            public let name: String
+            public let inputs: [Input]
+            public let anonymous: Bool
+
+            // MARK: Lifecycle
+
+            public init(name: String, inputs: [Input], anonymous: Bool) {
+                self.name = name
+                self.inputs = inputs
+                self.anonymous = anonymous
             }
         }
     }
@@ -151,9 +181,13 @@ extension ABI {
 extension ABI.Element {
     public func encodeParameters(_ parameters: [AnyObject]) -> Data? {
         switch self {
-        case .constructor(let constructor):
-            guard parameters.count == constructor.inputs.count else { return nil }
-            guard let data = ABIEncoder.encode(types: constructor.inputs, values: parameters) else { return nil }
+        case let .constructor(constructor):
+            guard parameters.count == constructor.inputs.count else {
+                return nil
+            }
+            guard let data = ABIEncoder.encode(types: constructor.inputs, values: parameters) else {
+                return nil
+            }
             return data
 
         case .event:
@@ -162,10 +196,14 @@ extension ABI.Element {
         case .fallback:
             return nil
 
-        case .function(let function):
-            guard parameters.count == function.inputs.count else { return nil }
+        case let .function(function):
+            guard parameters.count == function.inputs.count else {
+                return nil
+            }
             let signature = function.methodEncoding
-            guard let data = ABIEncoder.encode(types: function.inputs, values: parameters) else { return nil }
+            guard let data = ABIEncoder.encode(types: function.inputs, values: parameters) else {
+                return nil
+            }
             return signature + data
         }
     }
@@ -180,7 +218,7 @@ extension ABI.Element {
             return nil
         case .fallback:
             return nil
-        case .function(let function):
+        case let .function(function):
             if data.isEmpty, function.outputs.count == 1 {
                 let name = "0"
                 let value = function.outputs[0].type.emptyValue
@@ -192,10 +230,14 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.outputs.count * 32 <= data.count else { return nil }
+            guard function.outputs.count * 32 <= data.count else {
+                return nil
+            }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.outputs, data: data) else { return nil }
+            guard let values = ABIDecoder.decode(types: function.outputs, data: data) else {
+                return nil
+            }
             for output in function.outputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]
@@ -223,7 +265,7 @@ extension ABI.Element {
             return nil
         }
         switch self {
-        case .constructor(let function):
+        case let .constructor(function):
             if data.isEmpty, function.inputs.count == 1 {
                 let name = "0"
                 let value = function.inputs[0].type.emptyValue
@@ -235,10 +277,14 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.inputs.count * 32 <= data.count else { return nil }
+            guard function.inputs.count * 32 <= data.count else {
+                return nil
+            }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else { return nil }
+            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else {
+                return nil
+            }
             for input in function.inputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]
@@ -255,7 +301,7 @@ extension ABI.Element {
         case .fallback:
             return nil
 
-        case .function(let function):
+        case let .function(function):
             if sig != nil, sig != function.methodEncoding {
                 return nil
             }
@@ -270,10 +316,14 @@ extension ABI.Element {
                 return returnArray
             }
 
-            guard function.inputs.count * 32 <= data.count else { return nil }
+            guard function.inputs.count * 32 <= data.count else {
+                return nil
+            }
             var returnArray = [String: Any]()
             var i = 0
-            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else { return nil }
+            guard let values = ABIDecoder.decode(types: function.inputs, data: data) else {
+                return nil
+            }
             for input in function.inputs {
                 let name = "\(i)"
                 returnArray[name] = values[i]

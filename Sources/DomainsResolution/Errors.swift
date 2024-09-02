@@ -1,8 +1,7 @@
 //
 //  Errors.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/12.
 //
 
 import Foundation
@@ -31,9 +30,12 @@ public enum ResolutionError: Error {
     case unauthenticatedRequest
     case requestBeingRateLimited
 
+    // MARK: Static Properties
 
     static let tooManyResponsesCode = -32005
     static let badRequestOrResponseCode = -32042
+
+    // MARK: Static Functions
 
     static func parse(errorResponse: NetworkErrorResponse) -> ResolutionError? {
         let error = errorResponse.error

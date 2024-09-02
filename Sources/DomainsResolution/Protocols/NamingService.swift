@@ -1,8 +1,7 @@
 //
 //  NamingService.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/12.
 //
 
 import Foundation

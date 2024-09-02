@@ -1,8 +1,7 @@
 //
 //  UNS.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/12.
 //
 
 import Foundation
@@ -10,14 +9,22 @@ import Foundation
 // MARK: - UNS
 
 class UNS: CommonNamingService, NamingService {
+    // MARK: Nested Types
+
+    typealias GeneralFunction<T> = () throws -> T
+
+    // MARK: Static Properties
+
+    static let name: NamingServiceName = .uns
+
+    // MARK: Properties
+
     var layer1: UNSLayer!
     var layer2: UNSLayer!
     var znsLayer: ZNS!
     let asyncResolver: AsyncResolver
 
-    static let name: NamingServiceName = .uns
-    
-    typealias GeneralFunction<T> = () throws -> T
+    // MARK: Lifecycle
 
     init(_ config: Configurations) throws {
         asyncResolver = AsyncResolver()
@@ -37,6 +44,8 @@ class UNS: CommonNamingService, NamingService {
             throw ResolutionError.proxyReaderNonInitialized
         }
     }
+
+    // MARK: Functions
 
     func isSupported(domain: String) -> Bool {
         layer2.isSupported(domain: domain)
@@ -255,8 +264,16 @@ class UNS: CommonNamingService, NamingService {
             : config.network
 
         if let contractsContainer = try Self.parseContractAddresses(network: network) {
-            unsContract = try getUNSContract(contracts: contractsContainer, type: .unsRegistry, providerURL: config.providerURL)
-            cnsContract = try getUNSContract(contracts: contractsContainer, type: .cnsRegistry, providerURL: config.providerURL)
+            unsContract = try getUNSContract(
+                contracts: contractsContainer,
+                type: .unsRegistry,
+                providerURL: config.providerURL
+            )
+            cnsContract = try getUNSContract(
+                contracts: contractsContainer,
+                type: .cnsRegistry,
+                providerURL: config.providerURL
+            )
             proxyReaderContract = try getUNSContract(
                 contracts: contractsContainer,
                 type: .proxyReader,
@@ -303,7 +320,8 @@ class UNS: CommonNamingService, NamingService {
         contracts: [String: CommonNamingService.ContractAddressEntry],
         type: ContractType,
         providerURL: String
-    ) throws -> UNSContract? {
+    ) throws
+        -> UNSContract? {
         if let address = contracts[type.name]?.address {
             let contract = try super.buildContract(address: address, type: type, providerURL: providerURL)
             let deploymentBlock = contracts[type.name]?.deploymentBlock ?? "earliest"
@@ -312,7 +330,8 @@ class UNS: CommonNamingService, NamingService {
         return nil
     }
 
-    /// This is used only when all layers should not throw any errors. Methods like batchOwners or locations require both layers.
+    /// This is used only when all layers should not throw any errors. Methods like batchOwners or locations require
+    /// both layers.
     private func throwIfLayerHasError<T>(_ results: [UNSLocation: AsyncConsumer<T>]) throws {
         let l2Results = Utillities.getLayerResultWrapper(from: results, for: .layer2)
         let l1Results = Utillities.getLayerResultWrapper(from: results, for: .layer1)

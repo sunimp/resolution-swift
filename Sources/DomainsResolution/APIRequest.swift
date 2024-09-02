@@ -1,8 +1,7 @@
 //
 //  APIRequest.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/20.
 //
 
 import Foundation
@@ -35,33 +34,42 @@ public protocol NetworkingLayer {
 // MARK: - APIRequest
 
 struct APIRequest {
+    // MARK: Properties
+
     let url: URL
     let networking: NetworkingLayer
+
+    // MARK: Lifecycle
 
     init(_ endpoint: String, networking: NetworkingLayer) {
         url = URL(string: endpoint)!
         self.networking = networking
     }
 
+    // MARK: Functions
+
     func post(_ body: JsonRpcPayload, completion: @escaping (Result<JsonRpcResponseArray, Error>) -> Void) throws {
         do {
-            networking.makeHttpPostRequest(
+            try networking.makeHttpPostRequest(
                 url: url,
                 httpMethod: "POST",
                 httpHeaderContentType: "application/json",
-                httpBody: try JSONEncoder().encode(body),
+                httpBody: JSONEncoder().encode(body),
                 completion: completion
             )
         } catch { throw APIError.encodingError }
     }
 
-    func post(_ bodyArray: [JsonRpcPayload], completion: @escaping (Result<JsonRpcResponseArray, Error>) -> Void) throws {
+    func post(
+        _ bodyArray: [JsonRpcPayload],
+        completion: @escaping (Result<JsonRpcResponseArray, Error>) -> Void
+    ) throws {
         do {
-            networking.makeHttpPostRequest(
+            try networking.makeHttpPostRequest(
                 url: url,
                 httpMethod: "POST",
                 httpHeaderContentType: "application/json",
-                httpBody: try JSONEncoder().encode(bodyArray),
+                httpBody: JSONEncoder().encode(bodyArray),
                 completion: completion
             )
         } catch { throw APIError.encodingError }
@@ -71,9 +79,15 @@ struct APIRequest {
 // MARK: - DefaultNetworkingLayer
 
 public struct DefaultNetworkingLayer: NetworkingLayer {
+    // MARK: Properties
+
     var headers = [String: String]()
 
+    // MARK: Lifecycle
+
     public init() { }
+
+    // MARK: Functions
 
     public func makeHttpPostRequest(
         url: URL,
@@ -126,8 +140,7 @@ public struct DefaultNetworkingLayer: NetworkingLayer {
                 } catch {
                     if
                         let errorResponse = try? JSONDecoder().decode(NetworkErrorResponse.self, from: jsonData),
-                        let errorExplained = ResolutionError.parse(errorResponse: errorResponse)
-                    {
+                        let errorExplained = ResolutionError.parse(errorResponse: errorResponse) {
                         completion(.failure(errorExplained))
                     } else {
                         completion(.failure(APIError.decodingError))

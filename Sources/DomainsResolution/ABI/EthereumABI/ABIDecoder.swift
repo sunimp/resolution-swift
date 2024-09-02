@@ -1,8 +1,7 @@
 //
 //  ABIDecoder.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/2/16.
 //
 
 import BigInt
@@ -26,11 +25,15 @@ extension ABIDecoder {
         var consumed: UInt64 = 0
         for i in 0 ..< types.count {
             let (v, c) = decodeSingleType(type: types[i], data: data, pointer: consumed)
-            guard let valueUnwrapped = v, let consumedUnwrapped = c else { return nil }
+            guard let valueUnwrapped = v, let consumedUnwrapped = c else {
+                return nil
+            }
             toReturn.append(valueUnwrapped)
             consumed += consumedUnwrapped
         }
-        guard toReturn.count == types.count else { return nil }
+        guard toReturn.count == types.count else {
+            return nil
+        }
         return toReturn
     }
 
@@ -38,34 +41,43 @@ extension ABIDecoder {
         type: ABI.Element.ParameterType,
         data: Data,
         pointer: UInt64 = 0
-    ) -> (value: AnyObject?, bytesConsumed: UInt64?) {
+    )
+        -> (value: AnyObject?, bytesConsumed: UInt64?) {
         let (elData, nextPtr) = followTheData(type: type, data: data, pointer: pointer)
         guard let elementItself = elData, let nextElementPointer = nextPtr else {
             return (nil, nil)
         }
         switch type {
-        case .uint(let bits):
-            guard elementItself.count >= 32 else { break }
+        case let .uint(bits):
+            guard elementItself.count >= 32 else {
+                break
+            }
             let mod = BigUInt(1) << bits
             let dataSlice = elementItself[0 ..< 32]
             let v = BigUInt(dataSlice) % mod
             return (v as AnyObject, type.memoryUsage)
 
-        case .int(let bits):
-            guard elementItself.count >= 32 else { break }
+        case let .int(bits):
+            guard elementItself.count >= 32 else {
+                break
+            }
             let mod = BigInt(1) << bits
             let dataSlice = elementItself[0 ..< 32]
             let v = BigInt.fromTwosComplement(data: dataSlice) % mod
             return (v as AnyObject, type.memoryUsage)
 
         case .address:
-            guard elementItself.count >= 32 else { break }
+            guard elementItself.count >= 32 else {
+                break
+            }
             let dataSlice = elementItself[12 ..< 32]
             let address = EthereumAddress(dataSlice)
             return (address as AnyObject, type.memoryUsage)
 
         case .bool:
-            guard elementItself.count >= 32 else { break }
+            guard elementItself.count >= 32 else {
+                break
+            }
             let dataSlice = elementItself[0 ..< 32]
             let v = BigUInt(dataSlice)
             if v == BigUInt(1) {
@@ -74,76 +86,104 @@ extension ABIDecoder {
                 return (false as AnyObject, type.memoryUsage)
             }
 
-        case .bytes(let length):
-            guard elementItself.count >= 32 else { break }
+        case let .bytes(length):
+            guard elementItself.count >= 32 else {
+                break
+            }
             let dataSlice = elementItself[0 ..< length]
             return (dataSlice as AnyObject, type.memoryUsage)
 
         case .string:
-            guard elementItself.count >= 32 else { break }
+            guard elementItself.count >= 32 else {
+                break
+            }
             var dataSlice = elementItself[0 ..< 32]
             let length = UInt64(BigUInt(dataSlice))
-            guard elementItself.count >= 32 + length else { break }
+            guard elementItself.count >= 32 + length else {
+                break
+            }
             dataSlice = elementItself[32 ..< 32 + length]
-            guard let string = String(data: dataSlice, encoding: .utf8) else { break }
+            guard let string = String(data: dataSlice, encoding: .utf8) else {
+                break
+            }
 
             return (string as AnyObject, type.memoryUsage)
 
         case .dynamicBytes:
 
-            guard elementItself.count >= 32 else { break }
+            guard elementItself.count >= 32 else {
+                break
+            }
             var dataSlice = elementItself[0 ..< 32]
             let length = UInt64(BigUInt(dataSlice))
-            guard elementItself.count >= 32 + length else { break }
+            guard elementItself.count >= 32 + length else {
+                break
+            }
             dataSlice = elementItself[32 ..< 32 + length]
 
             return (dataSlice as AnyObject, type.memoryUsage)
 
-        case .array(type: let subType, length: let length):
+        case let .array(type: subType, length: length):
             switch type.arraySize {
             case .dynamicSize:
 
                 if subType.isStatic {
-                    guard elementItself.count >= 32 else { break }
+                    guard elementItself.count >= 32 else {
+                        break
+                    }
                     var dataSlice = elementItself[0 ..< 32]
                     let length = UInt64(BigUInt(dataSlice))
-                    guard elementItself.count >= 32 + subType.memoryUsage * length else { break }
+                    guard elementItself.count >= 32 + subType.memoryUsage * length else {
+                        break
+                    }
                     dataSlice = elementItself[32 ..< 32 + subType.memoryUsage * length]
                     var subpointer: UInt64 = 32
                     var toReturn = [AnyObject]()
                     for _ in 0 ..< length {
                         let (v, c) = decodeSingleType(type: subType, data: elementItself, pointer: subpointer)
-                        guard let valueUnwrapped = v, let consumedUnwrapped = c else { break }
+                        guard let valueUnwrapped = v, let consumedUnwrapped = c else {
+                            break
+                        }
                         toReturn.append(valueUnwrapped)
                         subpointer += consumedUnwrapped
                     }
                     return (toReturn as AnyObject, type.memoryUsage)
                 } else {
-                    guard elementItself.count >= 32 else { break }
+                    guard elementItself.count >= 32 else {
+                        break
+                    }
                     var dataSlice = elementItself[0 ..< 32]
                     let length = UInt64(BigUInt(dataSlice))
-                    guard elementItself.count >= 32 else { break }
+                    guard elementItself.count >= 32 else {
+                        break
+                    }
                     dataSlice = Data(elementItself[32 ..< elementItself.count])
                     var subpointer: UInt64 = 0
                     var toReturn = [AnyObject]()
 
                     for _ in 0 ..< length {
                         let (v, c) = decodeSingleType(type: subType, data: dataSlice, pointer: subpointer)
-                        guard let valueUnwrapped = v, let consumedUnwrapped = c else { break }
+                        guard let valueUnwrapped = v, let consumedUnwrapped = c else {
+                            break
+                        }
                         toReturn.append(valueUnwrapped)
                         subpointer += consumedUnwrapped
                     }
                     return (toReturn as AnyObject, nextElementPointer)
                 }
 
-            case .staticSize(let staticLength):
+            case let .staticSize(staticLength):
 
-                guard length == staticLength else { break }
+                guard length == staticLength else {
+                    break
+                }
                 var toReturn = [AnyObject]()
                 var consumed: UInt64 = 0
                 for _ in 0 ..< length {
                     let (v, c) = decodeSingleType(type: subType, data: elementItself, pointer: consumed)
-                    guard let valueUnwrapped = v, let consumedUnwrapped = c else { return (nil, nil) }
+                    guard let valueUnwrapped = v, let consumedUnwrapped = c else {
+                        return (nil, nil)
+                    }
                     toReturn.append(valueUnwrapped)
                     consumed += consumedUnwrapped
                 }
@@ -157,13 +197,15 @@ extension ABIDecoder {
                 break
             }
 
-        case .tuple(types: let subTypes):
+        case let .tuple(types: subTypes):
 
             var toReturn = [AnyObject]()
             var consumed: UInt64 = 0
             for i in 0 ..< subTypes.count {
                 let (v, c) = decodeSingleType(type: subTypes[i], data: elementItself, pointer: consumed)
-                guard let valueUnwrapped = v, let consumedUnwrapped = c else { return (nil, nil) }
+                guard let valueUnwrapped = v, let consumedUnwrapped = c else {
+                    return (nil, nil)
+                }
                 toReturn.append(valueUnwrapped)
                 consumed += consumedUnwrapped
             }
@@ -176,7 +218,9 @@ extension ABIDecoder {
 
         case .function:
 
-            guard elementItself.count >= 32 else { break }
+            guard elementItself.count >= 32 else {
+                break
+            }
             let dataSlice = elementItself[8 ..< 32]
 
             return (dataSlice as AnyObject, type.memoryUsage)
@@ -188,15 +232,20 @@ extension ABIDecoder {
         type: ABI.Element.ParameterType,
         data: Data,
         pointer: UInt64 = 0
-    ) -> (elementEncoding: Data?, nextElementPointer: UInt64?) {
+    )
+        -> (elementEncoding: Data?, nextElementPointer: UInt64?) {
         if type.isStatic {
-            guard data.count >= pointer + type.memoryUsage else { return (nil, nil) }
+            guard data.count >= pointer + type.memoryUsage else {
+                return (nil, nil)
+            }
             let elementItself = data[pointer ..< pointer + type.memoryUsage]
             let nextElement = pointer + type.memoryUsage
 
             return (Data(elementItself), nextElement)
         } else {
-            guard data.count >= pointer + type.memoryUsage else { return (nil, nil) }
+            guard data.count >= pointer + type.memoryUsage else {
+                return (nil, nil)
+            }
             let dataSlice = data[pointer ..< pointer + type.memoryUsage]
             let bn = BigUInt(dataSlice)
             if bn > UINT64_MAX || bn >= data.count {

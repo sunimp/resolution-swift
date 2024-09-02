@@ -1,22 +1,27 @@
 //
-//  Contract.swift
-//  DomainsResolution
+//  ContractZNS.swift
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/9/18.
 //
 
 import Foundation
 
 class ContractZNS {
+    // MARK: Properties
+
     let address: String
     let providerURL: String
     let networking: NetworkingLayer
+
+    // MARK: Lifecycle
 
     init(providerURL: String, address: String, networking: NetworkingLayer) {
         self.address = address
         self.providerURL = providerURL
         self.networking = networking
     }
+
+    // MARK: Functions
 
     func fetchSubState(field: String, keys: [String]) throws -> Any {
         let body = JsonRpcPayload(
@@ -33,7 +38,7 @@ class ContractZNS {
             let response = try postRequest(body)!
 
             guard
-                case ParamElement.dictionary(let dict) = response,
+                case let ParamElement.dictionary(dict) = response,
                 let results = reduce(dict: dict)[field] as? [String: Any]
             else {
                 print("Invalid response, can't process")
@@ -55,9 +60,9 @@ class ContractZNS {
         let semaphore = DispatchSemaphore(value: 0)
         try postRequest.post(body, completion: { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 resp = response[0]
-            case .failure(let error):
+            case let .failure(error):
                 err = error
             }
             semaphore.signal()
@@ -76,13 +81,13 @@ class ContractZNS {
             let (key, value) = pair
 
             switch value {
-            case .paramClass(let elem):
+            case let .paramClass(elem):
                 dict[key] = elem
-            case .string(let elem):
+            case let .string(elem):
                 dict[key] = elem
-            case .array(let array):
+            case let .array(array):
                 dict[key] = self.map(array: array)
-            case .dictionary(let dictionary):
+            case let .dictionary(dictionary):
                 dict[key] = self.reduce(dict: dictionary)
             }
         }
@@ -91,13 +96,13 @@ class ContractZNS {
     private func map(array: [ParamElement]) -> [Any] {
         array.map { value -> Any in
             switch value {
-            case .paramClass(let elem):
+            case let .paramClass(elem):
                 return elem
-            case .string(let elem):
+            case let .string(elem):
                 return elem
-            case .array(let array):
+            case let .array(array):
                 return self.map(array: array)
-            case .dictionary(let dictionary):
+            case let .dictionary(dictionary):
                 return self.reduce(dict: dictionary)
             }
         }

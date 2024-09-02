@@ -1,8 +1,7 @@
 //
 //  ABIParameterTypes.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/2/16.
 //
 
 import BigInt
@@ -11,7 +10,6 @@ import Foundation
 // MARK: - ABI.Element.ParameterType
 
 extension ABI.Element {
-
     /// Specifies the type that parameters in a contract have.
     public enum ParameterType: ABIElementPropertiesProtocol {
         case uint(bits: UInt64)
@@ -25,6 +23,8 @@ extension ABI.Element {
         case string
         indirect case tuple(types: [ParameterType])
 
+        // MARK: Computed Properties
+
         var isStatic: Bool {
             switch self {
             case .string:
@@ -33,7 +33,7 @@ extension ABI.Element {
             case .dynamicBytes:
                 return false
 
-            case .array(type: let type, length: let length):
+            case let .array(type: type, length: length):
                 if length == 0 {
                     return false
                 }
@@ -42,7 +42,7 @@ extension ABI.Element {
                 }
                 return true
 
-            case .tuple(types: let types):
+            case let .tuple(types: types):
                 for t in types {
                     // swiftlint:disable for_where
                     if !t.isStatic {
@@ -88,7 +88,7 @@ extension ABI.Element {
 
         var memoryUsage: UInt64 {
             switch self {
-            case .array(_, length: let length):
+            case let .array(_, length: length):
                 if length == 0 {
                     return 32
                 }
@@ -97,7 +97,7 @@ extension ABI.Element {
                 }
                 return 32
 
-            case .tuple(types: let types):
+            case let .tuple(types: types):
                 if !isStatic {
                     return 32
                 }
@@ -129,10 +129,10 @@ extension ABI.Element {
             case .bool:
                 return false
 
-            case .bytes(length: let length):
+            case let .bytes(length: length):
                 return Data(repeating: 0x00, count: Int(length))
 
-            case .array(type: let type, length: let length):
+            case let .array(type: type, length: length):
                 let emptyValueOfType = type.emptyValue
                 return Array(repeating: emptyValueOfType, count: Int(length))
 
@@ -160,7 +160,6 @@ extension ABI.Element {
             }
         }
     }
-
 }
 
 // MARK: - ABI.Element.ParameterType + Equatable
@@ -168,19 +167,19 @@ extension ABI.Element {
 extension ABI.Element.ParameterType: Equatable {
     public static func == (lhs: ABI.Element.ParameterType, rhs: ABI.Element.ParameterType) -> Bool {
         switch (lhs, rhs) {
-        case (.uint(let length1), .uint(let length2)):
+        case let (.uint(length1), .uint(length2)):
             length1 == length2
-        case (.int(let length1), .int(let length2)):
+        case let (.int(length1), .int(length2)):
             length1 == length2
         case (.address, .address):
             true
         case (.bool, .bool):
             true
-        case (.bytes(let length1), .bytes(let length2)):
+        case let (.bytes(length1), .bytes(length2)):
             length1 == length2
         case (.function, .function):
             true
-        case (.array(let type1, let length1), .array(let type2, let length2)):
+        case let (.array(type1, length1), .array(type2, length2)):
             type1 == type2 && length1 == length2
         case (.dynamicBytes, .dynamicBytes):
             true
@@ -223,10 +222,10 @@ extension ABI.Element.Event {
 extension ABI.Element.ParameterType: ABIEncoding {
     public var abiRepresentation: String {
         switch self {
-        case .uint(let bits):
+        case let .uint(bits):
             return "uint\(bits)"
 
-        case .int(let bits):
+        case let .int(bits):
             return "int\(bits)"
 
         case .address:
@@ -235,7 +234,7 @@ extension ABI.Element.ParameterType: ABIEncoding {
         case .bool:
             return "bool"
 
-        case .bytes(let length):
+        case let .bytes(length):
             return "bytes\(length)"
 
         case .dynamicBytes:
@@ -244,14 +243,14 @@ extension ABI.Element.ParameterType: ABIEncoding {
         case .function:
             return "function"
 
-        case .array(type: let type, length: let length):
+        case let .array(type: type, length: length):
             if length == 0 {
                 return "\(type.abiRepresentation)[]"
             }
             return "\(type.abiRepresentation)[\(length)]"
 
-        case .tuple(types: let types):
-            let typesRepresentation = types.map({ $0.abiRepresentation })
+        case let .tuple(types: types):
+            let typesRepresentation = types.map { $0.abiRepresentation }
             let typesJoined = typesRepresentation.joined(separator: ",")
             return "tuple(\(typesJoined))"
 
@@ -266,16 +265,17 @@ extension ABI.Element.ParameterType: ABIEncoding {
 extension ABI.Element.ParameterType: ABIValidation {
     public var isValid: Bool {
         switch self {
-        case .uint(let bits), .int(let bits):
+        case let .uint(bits),
+             let .int(bits):
             return bits > 0 && bits <= 256 && bits % 8 == 0
 
-        case .bytes(let length):
+        case let .bytes(length):
             return length > 0 && length <= 32
 
-        case .array(type: let type, _):
+        case let .array(type: type, _):
             return type.isValid
 
-        case .tuple(types: let types):
+        case let .tuple(types: types):
             for t in types {
                 if !t.isValid {
                     return false

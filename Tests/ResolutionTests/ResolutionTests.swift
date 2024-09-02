@@ -1,8 +1,7 @@
 //
 //  ResolutionTests.swift
-//  ResolutionTests
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/12.
 //
 
 import XCTest
@@ -23,24 +22,12 @@ enum TestConfigError: Error {
 // MARK: - ResolutionTests
 
 class ResolutionTests: XCTestCase {
-
-    static func getL1TestNetRpcURL() throws -> String {
-        if let l1URL = ProcessInfo.processInfo.environment["L1_TEST_NET_RPC_URL"] {
-            return l1URL
-        } else {
-            throw TestConfigError.runtimeError("L1_TEST_NET_RPC_URL is not set!")
-        }
-    }
-
-    static func getL2TestNetRpcURL() throws -> String {
-        if let l2URL = ProcessInfo.processInfo.environment["L2_TEST_NET_RPC_URL"] {
-            return l2URL
-        } else {
-            throw TestConfigError.runtimeError("L2_TEST_NET_RPC_URL is not set!")
-        }
-    }
+    // MARK: Properties
 
     let timeout: TimeInterval = 30
+
+    // MARK: Overridden Functions
+
     override func setUp() {
         super.setUp()
         resolution = try! Resolution(
@@ -62,6 +49,26 @@ class ResolutionTests: XCTestCase {
             )
         )
     }
+
+    // MARK: Static Functions
+
+    static func getL1TestNetRpcURL() throws -> String {
+        if let l1URL = ProcessInfo.processInfo.environment["L1_TEST_NET_RPC_URL"] {
+            return l1URL
+        } else {
+            throw TestConfigError.runtimeError("L1_TEST_NET_RPC_URL is not set!")
+        }
+    }
+
+    static func getL2TestNetRpcURL() throws -> String {
+        if let l2URL = ProcessInfo.processInfo.environment["L2_TEST_NET_RPC_URL"] {
+            return l2URL
+        } else {
+            throw TestConfigError.runtimeError("L2_TEST_NET_RPC_URL is not set!")
+        }
+    }
+
+    // MARK: Functions
 
     func testInitWithApiKey() throws {
         let resolution = try? Resolution(
@@ -96,11 +103,11 @@ class ResolutionTests: XCTestCase {
         var zilOwner = ""
         resolution.owner(domain: TestHelpers.getTestDomain(.ZIL_DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 zilOwner = returnValue
                 domainReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Owner Address, but got \(error)")
             }
         }
@@ -150,11 +157,11 @@ class ResolutionTests: XCTestCase {
         for i in 0 ..< cases.count {
             resolution.isSupported(domain: cases[i].domain) { result in
                 switch result {
-                case .success(let returnValue):
+                case let .success(returnValue):
                     cases[i].result = returnValue
                     cases[i].expectation.fulfill()
 
-                case .failure(let error):
+                case let .failure(error):
                     XCTFail("Expected boolen, but got \(error)")
                 }
             }
@@ -198,11 +205,11 @@ class ResolutionTests: XCTestCase {
         var ethAddress = ""
         resolution.addr(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), ticker: "eth") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 ethAddress = returnValue
                 domainReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address, but got \(error)")
             }
         }
@@ -221,11 +228,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.dns(domain: domain, types: dnsTypes) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 domainDnsReceived.fulfill()
                 testResult = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected dns record, but got \(error)")
             }
         }
@@ -264,51 +271,52 @@ class ResolutionTests: XCTestCase {
         var NoRecordResult: Result<String, ResolutionError>!
 
         // When
-        resolution.multiChainAddress(domain: TestHelpers.getTestDomain(.LAYER2_DOMAIN), ticker: "usdt", chain: "erc20") {
-            NoRecordResult = $0
-            NoRecordReceived.fulfill()
-        }
+        resolution
+            .multiChainAddress(domain: TestHelpers.getTestDomain(.LAYER2_DOMAIN), ticker: "usdt", chain: "erc20") {
+                NoRecordResult = $0
+                NoRecordReceived.fulfill()
+            }
 
         resolution.multiChainAddress(domain: domain, ticker: "usdt", chain: "erc20") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 erc20Received.fulfill()
                 erc20 = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected erc20 usdt address, but got \(error)")
             }
         }
 
         resolution.multiChainAddress(domain: unNormalizedDomain, ticker: "usdt", chain: "eos") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 eosReceived.fulfill()
                 eos = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected eos usdt address, but got \(error)")
             }
         }
 
         resolution.multiChainAddress(domain: domain, ticker: "usdt", chain: "tron") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 tronReceived.fulfill()
                 tron = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected tron usdt address, but got \(error)")
             }
         }
 
         resolution.multiChainAddress(domain: unNormalizedDomain, ticker: "usdt", chain: "omni") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 omniReceived.fulfill()
                 omni = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected omni usdt address, but got \(error)")
             }
         }
@@ -334,11 +342,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.owner(domain: TestHelpers.getTestDomain(.UNNORMALIZED_DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 domainCryptoReceived.fulfill()
                 owner = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owner, but got \(error)")
             }
         }
@@ -365,13 +373,16 @@ class ResolutionTests: XCTestCase {
         var partialResult: Result<[String: String?], ResolutionError>!
 
         // When
-        resolution.batchOwners(domains: [TestHelpers.getTestDomain(.DOMAIN), TestHelpers.getTestDomain(.DOMAIN2)]) { result in
+        resolution.batchOwners(domains: [
+            TestHelpers.getTestDomain(.DOMAIN),
+            TestHelpers.getTestDomain(.DOMAIN2),
+        ]) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 owners = returnValue
                 domainCryptoReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owners, but got \(error)")
             }
         }
@@ -389,19 +400,20 @@ class ResolutionTests: XCTestCase {
 
         // Then
         switch partialResult {
-        case .success(let dict):
+        case let .success(dict):
             let lowercasedDict = dict.mapValues { $0?.lowercased() }
             assert(
                 lowercasedDict[TestHelpers.getTestDomain(.DOMAIN)] == "0xe586d5Bf4d7779498648DF67b73c88a712E4359d"
                     .lowercased()
             )
             assert(
-                lowercasedDict[TestHelpers.getTestDomain(.LAYER2_DOMAIN)] == "0x499dD6D875787869670900a2130223D85d4F6Aa7"
+                lowercasedDict[TestHelpers.getTestDomain(.LAYER2_DOMAIN)] ==
+                    "0x499dD6D875787869670900a2130223D85d4F6Aa7"
                     .lowercased()
             )
             XCTAssertNil(lowercasedDict[TestHelpers.getTestDomain(.UNREGISTERED_DOMAIN)]!)
 
-        case .failure(let error):
+        case let .failure(error):
             XCTFail("Expected owners, but got \(error)")
 
         case .none:
@@ -409,8 +421,14 @@ class ResolutionTests: XCTestCase {
         }
 
         let lowercasedOwners = owners.mapValues { $0?.lowercased() }
-        assert(lowercasedOwners[TestHelpers.getTestDomain(.DOMAIN)] == "0xe586d5Bf4d7779498648DF67b73c88a712E4359d".lowercased())
-        assert(lowercasedOwners[TestHelpers.getTestDomain(.DOMAIN2)] == "0x499dD6D875787869670900a2130223D85d4F6Aa7".lowercased())
+        assert(
+            lowercasedOwners[TestHelpers.getTestDomain(.DOMAIN)] == "0xe586d5Bf4d7779498648DF67b73c88a712E4359d"
+                .lowercased()
+        )
+        assert(
+            lowercasedOwners[TestHelpers.getTestDomain(.DOMAIN2)] == "0x499dD6D875787869670900a2130223D85d4F6Aa7"
+                .lowercased()
+        )
     }
 
     func testGetResolver() throws {
@@ -424,15 +442,14 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.resolver(domain: TestHelpers.getTestDomain(.UNNORMALIZED_DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 domainCryptoReceived.fulfill()
                 resolverAddress = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected resolver Address, but got \(error)")
             }
         }
-
 
         resolution.resolver(domain: TestHelpers.getTestDomain(.UNREGISTERED_DOMAIN)) {
             unregisteredResult = $0
@@ -461,33 +478,33 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.addr(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), network: "ETH", token: "ETH") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 l2Address = returnValue
                 l2AddressReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address, but got \(error.localizedDescription)")
             }
         }
 
         resolution.addr(domain: TestHelpers.getTestDomain(.DOMAIN), network: "ETH", token: "ETH") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 l1Address = returnValue
                 l1AddressReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address, but got \(error.localizedDescription)")
             }
         }
 
         resolution.addr(domain: TestHelpers.getTestDomain(.LAYER2_DOMAIN), network: "ETH", token: "ETH") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 emptyAddress = returnValue
                 emptyAddressReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address, but got \(error.localizedDescription)")
             }
         }
@@ -519,22 +536,22 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.addr(domain: TestHelpers.getTestDomain(.DOMAIN), ticker: "eth") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 ethAddress = returnValue
                 domainReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address, but got \(error.localizedDescription)")
             }
         }
 
         resolution.addr(domain: "uns-devtest-testdomain303030.zil", ticker: "eth") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 domainZilReceived.fulfill()
                 zilUNSAddress = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owner, but got \(error)")
             }
         }
@@ -562,11 +579,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.chatID(domain: TestHelpers.getTestDomain(.DOMAIN3)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 chatID = returnValue
                 chatReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected chat ID, but got \(error)")
             }
         }
@@ -591,11 +608,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.ipfsHash(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 hash = returnValue
                 domainReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected ipfsHash, but got \(error)")
             }
         }
@@ -623,11 +640,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.record(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), key: "custom.record") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 domainReceived.fulfill()
                 customRecord = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected custom record, but got \(error)")
             }
         }
@@ -741,11 +758,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.records(domain: domain, keys: keys) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 values = returnValue
                 domainReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected ipfsHash, but got \(error)")
             }
         }
@@ -771,18 +788,18 @@ class ResolutionTests: XCTestCase {
         var locations: [String: Location] = [:]
         resolution.locations(domains: domains) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 locationsReceived.fulfill()
                 locations = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected locations, but got \(error)")
             }
         }
 
         waitForExpectations(timeout: timeout, handler: nil)
 
-        let answers: [String: Location] = [
+        let answers: [String: Location] = try [
             TestHelpers.getTestDomain(.UNREGISTERED_DOMAIN): Location(
                 registryAddress: nil,
                 resolverAddress: nil,
@@ -797,7 +814,7 @@ class ResolutionTests: XCTestCase {
                 networkID: "5",
                 blockchain: "ETH",
                 owner: "0xe586d5Bf4d7779498648DF67b73c88a712E4359d",
-                providerURL: try ResolutionTests.getL1TestNetRpcURL()
+                providerURL: ResolutionTests.getL1TestNetRpcURL()
             ),
             TestHelpers.getTestDomain(.WALLET_DOMAIN): Location(
                 registryAddress: "0x2a93c52e7b6e7054870758e15a1446e769edfb93",
@@ -805,7 +822,7 @@ class ResolutionTests: XCTestCase {
                 networkID: "80001",
                 blockchain: "MATIC",
                 owner: "0xD92d2A749424a5181AD7d45f786a9FFE46c10A7C",
-                providerURL: try ResolutionTests.getL2TestNetRpcURL()
+                providerURL: ResolutionTests.getL2TestNetRpcURL()
             ),
             TestHelpers.getTestDomain(.LAYER2_DOMAIN): Location(
                 registryAddress: "0x2a93c52e7b6e7054870758e15a1446e769edfb93",
@@ -813,7 +830,7 @@ class ResolutionTests: XCTestCase {
                 networkID: "80001",
                 blockchain: "MATIC",
                 owner: "0x499dD6D875787869670900a2130223D85d4F6Aa7",
-                providerURL: try ResolutionTests.getL2TestNetRpcURL()
+                providerURL: ResolutionTests.getL2TestNetRpcURL()
             ),
         ]
 
@@ -823,7 +840,6 @@ class ResolutionTests: XCTestCase {
             assert(locations[domain] == answers[domain])
         }
     }
-
 
     func testCheckDomain() throws {
         // Given
@@ -856,7 +872,6 @@ class ResolutionTests: XCTestCase {
         let layer1OwnerReceived = expectation(description: "Domain should return owner address on layer1")
         let unregisteredReceived = expectation(description: "Unregistered domain should be received")
 
-
         var layer2Owner = ""
         var layer1Owner = ""
         var unregisteredResult: Result<String, ResolutionError>!
@@ -864,22 +879,22 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.owner(domain: TestHelpers.getTestDomain(.LAYER2_DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 layer2OwnerReceived.fulfill()
                 layer2Owner = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owner from layer2, but got \(error)")
             }
         }
 
         resolution.owner(domain: TestHelpers.getTestDomain(.DOMAIN)) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 layer1OwnerReceived.fulfill()
                 layer1Owner = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owner from layer1, but got \(error)")
             }
         }
@@ -913,11 +928,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.batchOwners(domains: [layer2Domain, layer1Domain]) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 owners = returnValue
                 domainCryptoReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected owners, but got \(error)")
             }
         }
@@ -931,12 +946,12 @@ class ResolutionTests: XCTestCase {
 
         // Then
         switch partialResult {
-        case .success(let dict):
-            let lowercasedOwners = dict.mapValues({ $0?.lowercased() })
+        case let .success(dict):
+            let lowercasedOwners = dict.mapValues { $0?.lowercased() }
             assert(lowercasedOwners[layer2Domain] == "0x499dD6D875787869670900a2130223D85d4F6Aa7".lowercased())
             assert(lowercasedOwners[unregisteredDomain]! == nil)
 
-        case .failure(let error):
+        case let .failure(error):
             XCTFail("Expected owners, but got \(error)")
 
         case .none:
@@ -963,22 +978,22 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.addr(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), ticker: "eth") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 layer2EthAddress = returnValue
                 ethFroml2Received.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address from layer2, but got \(error)")
             }
         }
 
         resolution.addr(domain: TestHelpers.getTestDomain(.DOMAIN), ticker: "eth") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 layer1EthAddress = returnValue
                 ethFroml1Received.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected Eth Address from layer1, but got \(error)")
             }
         }
@@ -1012,11 +1027,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.record(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), key: "custom.record") { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 customRecord = returnValue
                 customRecordReceived.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected to get a custom record from layer 2, but got \(error)")
             }
         }
@@ -1042,11 +1057,11 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.records(domain: TestHelpers.getTestDomain(.WALLET_DOMAIN), keys: recordKeys) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 layer2Records = returnValue
                 recordsFromL2Received.fulfill()
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected to get record from layer 2, but got \(error)")
             }
         }
@@ -1088,7 +1103,8 @@ class ResolutionTests: XCTestCase {
 
     //     waitForExpectations(timeout: timeout, handler: nil);
 
-    //     assert(layer1TokenUri == "https://metadata.ud-staging.com/metadata/reseller-test-udtesting-459239285.crypto");
+    //     assert(layer1TokenUri ==
+    //     "https://metadata.ud-staging.com/metadata/reseller-test-udtesting-459239285.crypto");
     //     assert(layer2TokenUri == "https://metadata.ud-staging.com/metadata/29206072489201256414040015626327292653094949751666860355749665089956336890808");
     // }
 
@@ -1133,7 +1149,8 @@ class ResolutionTests: XCTestCase {
         // Given
         let reverseReceived = expectation(description: "Reverse resolution should be received")
         let reverseL2Received = expectation(description: "Reverse resolution should be received with explicit layer")
-        let reverseDoesntExistReceived = expectation(description: "Error should be received for not existing reverse resolution")
+        let reverseDoesntExistReceived =
+            expectation(description: "Error should be received for not existing reverse resolution")
 
         let reverseAddress = "0xd92d2a749424a5181ad7d45f786a9ffe46c10a7c"
         let reverseDoesntExist = "0x0000000000000000000000000000000000000001"
@@ -1145,22 +1162,22 @@ class ResolutionTests: XCTestCase {
         // When
         resolution.reverseTokenID(address: reverseAddress, location: nil) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 reverseReceived.fulfill()
                 reverseResult = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected reverse resolution, but got \(error)")
             }
         }
 
         resolution.reverseTokenID(address: reverseAddress, location: .layer2) { result in
             switch result {
-            case .success(let returnValue):
+            case let .success(returnValue):
                 reverseL2Received.fulfill()
                 reverseL2Result = returnValue
 
-            case .failure(let error):
+            case let .failure(error):
                 XCTFail("Expected reverse resolution from layer2, but got \(error)")
             }
         }
@@ -1175,14 +1192,19 @@ class ResolutionTests: XCTestCase {
         // Then
         assert(reverseResult == "0x0df03d18a0a02673661da22d06f43801a986840e5812989139f0f7a2c41037c2")
         assert(reverseL2Result == "0x0df03d18a0a02673661da22d06f43801a986840e5812989139f0f7a2c41037c2")
-        TestHelpers.checkError(result: reverseDoesntExistResult, expectedError: ResolutionError.reverseResolutionNotSpecified)
+        TestHelpers.checkError(
+            result: reverseDoesntExistResult,
+            expectedError: ResolutionError.reverseResolutionNotSpecified
+        )
     }
 
     // func testReverse() {
     //     // Given
     //     let reverseReceived = expectation(description: "Reverse resolution should be received");
-    //     let reverseL2Received = expectation(description: "Reverse resolution should be received with explicit layer");
-    //     let reverseDoesntExistReceived = expectation(description: "Error should be received for not existing reverse resolution");
+    //     let reverseL2Received = expectation(description: "Reverse resolution should be received with explicit
+    //     layer");
+    //     let reverseDoesntExistReceived = expectation(description: "Error should be received for not existing reverse
+    //     resolution");
 
     //     let reverseAddress = "0xd92d2a749424a5181ad7d45f786a9ffe46c10a7c"
     //     let reverseDoesntExist = "0x0000000000000000000000000000000000000001"

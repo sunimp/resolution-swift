@@ -1,8 +1,7 @@
 //
 //  UNSLayer.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/12.
 //
 
 import BigInt
@@ -11,6 +10,16 @@ import Foundation
 // MARK: - UNSLayer
 
 class UNSLayer: CommonNamingService {
+    // MARK: Nested Types
+
+    struct OwnerResolverRecord {
+        let owner: String
+        let resolver: String
+        let record: String
+    }
+
+    // MARK: Static Properties
+
     static let TransferEventSignature = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
     static let NewURIEventSignature = "0xc5beef08f693b11c316c0c8394a377a0033c9cf701b8cd8afd79cecef60c3952"
     static let getDataForManyMethodName = "getDataForMany"
@@ -20,11 +29,15 @@ class UNSLayer: CommonNamingService {
     static let registryOfMethodName = "registryOf"
     static let existName = "exists"
 
+    // MARK: Properties
+
     let network: String
     let blockchain: String?
     let layer: UNSLocation
     var nsRegistries: [UNSContract]
     var proxyReaderContract: Contract?
+
+    // MARK: Lifecycle
 
     init(name: UNSLocation, config: NamingServiceConfig, contracts: [UNSContract]) throws {
         network = config.network.isEmpty
@@ -42,6 +55,8 @@ class UNSLayer: CommonNamingService {
             }
         }
     }
+
+    // MARK: Functions
 
     func isSupported(domain: String) -> Bool {
         if domain ~= "^[^-]*[^-]*\\.(eth|luxe|xyz|kred|addr\\.reverse)$" {
@@ -63,12 +78,6 @@ class UNSLayer: CommonNamingService {
             return isExist
         }
         return false
-    }
-
-    struct OwnerResolverRecord {
-        let owner: String
-        let resolver: String
-        let record: String
     }
 
     // MARK: - geters of Owner and Resolver
@@ -121,38 +130,9 @@ class UNSLayer: CommonNamingService {
         return try resolverFromTokenID(tokenID: tokenID)
     }
 
-    private func resolverFromTokenID(tokenID: String) throws -> String {
-        let res: Any
-        do {
-            res = try getDataForMany(keys: [Contract.resolversKey, Contract.ownersKey], for: [tokenID])
-            guard
-                let owners = unfoldForMany(contractResult: res, key: Contract.ownersKey),
-                Utillities.isNotEmpty(owners[0])
-            else {
-                throw ResolutionError.unregisteredDomain
-            }
-        } catch {
-            if error is ABICoderError {
-                throw ResolutionError.unspecifiedResolver(layer.rawValue)
-            }
-            throw error
-        }
-        guard
-            let rec = unfoldForMany(contractResult: res, key: Contract.resolversKey),
-            !rec.isEmpty
-        else {
-            throw ResolutionError.unspecifiedResolver(layer.rawValue)
-        }
-        guard Utillities.isNotEmpty(rec[0]) else {
-            throw ResolutionError.unspecifiedResolver(layer.rawValue)
-        }
-        return rec[0]
-    }
-
     func addr(domain: String, ticker: String) throws -> String {
         let key = "crypto.\(ticker.uppercased()).address"
-        let result = try record(domain: domain, key: key)
-        return result
+        return try record(domain: domain, key: key)
     }
 
     func addr(domain: String, network: String, token: String) throws -> String {
@@ -189,8 +169,7 @@ class UNSLayer: CommonNamingService {
                 .callMethod(
                     methodName: Self.getAddressMethodName,
                     args: [network, token, tokenID]
-                )
-        {
+                ) {
             return result
         }
         throw ResolutionError.proxyReaderNonInitialized
@@ -213,22 +192,6 @@ class UNSLayer: CommonNamingService {
         return try records(keys: mergedRecords, for: domain).filter { !$0.value.isEmpty }
     }
 
-    private func recordFromTokenID(tokenID: String, key: String) throws -> String {
-        let result: OwnerResolverRecord
-        do {
-            result = try getOwnerResolverRecord(tokenID: tokenID, key: key)
-        } catch {
-            if error is ABICoderError {
-                throw ResolutionError.unspecifiedResolver(layer.rawValue)
-            }
-            throw error
-        }
-        guard Utillities.isNotEmpty(result.owner) else { throw ResolutionError.unregisteredDomain }
-        guard Utillities.isNotEmpty(result.resolver) else { throw ResolutionError.unspecifiedResolver(layer.rawValue) }
-
-        return result.record
-    }
-
     func records(keys: [String], for domain: String) throws -> [String: String] {
         let tokenID = super.namehash(domain: domain)
 
@@ -242,14 +205,12 @@ class UNSLayer: CommonNamingService {
         if
             let valuesArray = dict[Contract.valuesKey] as? [[String]],
             !valuesArray.isEmpty,
-            !valuesArray[0].isEmpty
-        {
+            !valuesArray[0].isEmpty {
             let result = valuesArray[0]
-            let returnValue = zip(keys, result).reduce(into: [String: String]()) { dict, pair in
+            return zip(keys, result).reduce(into: [String: String]()) { dict, pair in
                 let (key, value) = pair
                 dict[key] = value
             }
-            return returnValue
         }
         // The line below will never get executed.
         fatalError("Failed unwrapping the results")
@@ -270,8 +231,7 @@ class UNSLayer: CommonNamingService {
                     .callMethod(
                         methodName: Self.tokenURIMethodName,
                         args: [tokenID]
-                    )
-            {
+                    ) {
                 let dict = result as? [String: Any]
                 if let val = dict?["0"] as? String {
                     if !val.isEmpty {
@@ -307,6 +267,54 @@ class UNSLayer: CommonNamingService {
         throw ResolutionError.reverseResolutionNotSpecified
     }
 
+    private func resolverFromTokenID(tokenID: String) throws -> String {
+        let res: Any
+        do {
+            res = try getDataForMany(keys: [Contract.resolversKey, Contract.ownersKey], for: [tokenID])
+            guard
+                let owners = unfoldForMany(contractResult: res, key: Contract.ownersKey),
+                Utillities.isNotEmpty(owners[0])
+            else {
+                throw ResolutionError.unregisteredDomain
+            }
+        } catch {
+            if error is ABICoderError {
+                throw ResolutionError.unspecifiedResolver(layer.rawValue)
+            }
+            throw error
+        }
+        guard
+            let rec = unfoldForMany(contractResult: res, key: Contract.resolversKey),
+            !rec.isEmpty
+        else {
+            throw ResolutionError.unspecifiedResolver(layer.rawValue)
+        }
+        guard Utillities.isNotEmpty(rec[0]) else {
+            throw ResolutionError.unspecifiedResolver(layer.rawValue)
+        }
+        return rec[0]
+    }
+
+    private func recordFromTokenID(tokenID: String, key: String) throws -> String {
+        let result: OwnerResolverRecord
+        do {
+            result = try getOwnerResolverRecord(tokenID: tokenID, key: key)
+        } catch {
+            if error is ABICoderError {
+                throw ResolutionError.unspecifiedResolver(layer.rawValue)
+            }
+            throw error
+        }
+        guard Utillities.isNotEmpty(result.owner) else {
+            throw ResolutionError.unregisteredDomain
+        }
+        guard Utillities.isNotEmpty(result.resolver) else {
+            throw ResolutionError.unspecifiedResolver(layer.rawValue)
+        }
+
+        return result.record
+    }
+
     // MARK: - Helper functions
 
     private func getTokenUriMetadata(tokenID: String) throws -> TokenUriMetadata {
@@ -329,9 +337,9 @@ class UNSLayer: CommonNamingService {
         semaphore.wait()
 
         switch tokenUriMetadataResult {
-        case .success(let tokenUriMetadata):
+        case let .success(tokenUriMetadata):
             return tokenUriMetadata
-        case .failure(let error):
+        case let .failure(error):
             throw error
         case .none:
             throw ResolutionError.badRequestOrResponse
@@ -342,7 +350,8 @@ class UNSLayer: CommonNamingService {
         _ multiCallBytes: [Data],
         from calls: [MultiCallData],
         for domains: [String]
-    ) throws -> [String: Location] {
+    ) throws
+        -> [String: Location] {
         var registries: [String] = []
         var owners: [String] = []
         var resolvers: [String] = []
@@ -354,8 +363,7 @@ class UNSLayer: CommonNamingService {
                 if
                     let result = try proxyReaderContract?.coder.decode(hexMessage, from: Self.registryOfMethodName),
                     let dict = result as? [String: Any],
-                    let val = dict["0"] as? EthereumAddress
-                {
+                    let val = dict["0"] as? EthereumAddress {
                     registries.append(val._address)
                 }
 
@@ -364,8 +372,7 @@ class UNSLayer: CommonNamingService {
                 if
                     let dict = try proxyReaderContract?.coder.decode(hexMessage, from: Self.getDataForManyMethodName),
                     let domainOwners = unfoldForMany(contractResult: dict, key: Contract.ownersKey),
-                    let domainResolvers = unfoldForMany(contractResult: dict, key: Contract.resolversKey)
-                {
+                    let domainResolvers = unfoldForMany(contractResult: dict, key: Contract.resolversKey) {
                     owners += domainOwners
                     resolvers += domainResolvers
                 }
@@ -383,7 +390,8 @@ class UNSLayer: CommonNamingService {
         owners: [String],
         resolvers: [String],
         registries: [String]
-    ) -> [String: Location] {
+    )
+        -> [String: Location] {
         var locations: [String: Location] = [:]
         for (domain, (owner, (resolver, registry))) in zip(domains, zip(owners, zip(resolvers, registries))) {
             if Utillities.isNotEmpty(owner) {
@@ -425,8 +433,7 @@ class UNSLayer: CommonNamingService {
     private func unfoldForMany(contractResult: Any, key: String = "0") -> [String]? {
         if
             let dict = contractResult as? [String: Any],
-            let element = dict[key]
-        {
+            let element = dict[key] {
             return unfoldAddressForMany(element)
         }
         return nil
@@ -438,8 +445,7 @@ class UNSLayer: CommonNamingService {
             if
                 let owners = unfoldAddressForMany(dict[Contract.ownersKey]),
                 let resolvers = unfoldAddressForMany(dict[Contract.resolversKey]),
-                let valuesArray = dict[Contract.valuesKey] as? [[String]]
-            {
+                let valuesArray = dict[Contract.valuesKey] as? [[String]] {
                 guard Utillities.isNotEmpty(owners[0]) else {
                     throw ResolutionError.unregisteredDomain
                 }
@@ -465,8 +471,7 @@ class UNSLayer: CommonNamingService {
                 .callMethod(
                     methodName: Self.reverseOfMethodName,
                     args: [address]
-                )
-        {
+                ) {
             return result
         }
         throw ResolutionError.proxyReaderNonInitialized
@@ -478,7 +483,9 @@ class UNSLayer: CommonNamingService {
                 .callMethod(
                     methodName: Self.getDataForManyMethodName,
                     args: [keys, tokenIDs]
-                ) { return result }
+                ) {
+            return result
+        }
         throw ResolutionError.proxyReaderNonInitialized
     }
 
@@ -489,8 +496,7 @@ class UNSLayer: CommonNamingService {
                     .callMethod(
                         methodName: Self.registryOfMethodName,
                         args: [tokenID]
-                    )
-            {
+                    ) {
                 let dict = result as? [String: Any]
                 if let val = dict?["0"] as? EthereumAddress {
                     if !Utillities.isNotEmpty(val.address) {
@@ -533,7 +539,9 @@ extension Data {
             .map { String(chars[$0]) + String(chars[$0 + 1]) }
             .compactMap { UInt8($0, radix: 16) }
 
-        guard hex.count / bytes.count == 2 else { return nil }
+        guard hex.count / bytes.count == 2 else {
+            return nil
+        }
         self.init(bytes)
     }
 }

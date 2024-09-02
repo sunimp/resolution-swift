@@ -1,8 +1,7 @@
 //
 //  ABICoder.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/18.
 //
 
 import Foundation
@@ -21,14 +20,20 @@ enum ABICoderError: Error {
 
 // swiftlint:disable identifier_name
 class ABICoder {
+    // MARK: Properties
+
     let abi: ABIContract
+
+    // MARK: Computed Properties
 
     private var methods: [String: ABI.Element] {
         var toReturn = [String: ABI.Element]()
         for m in abi {
             switch m {
-            case .function(let function):
-                guard let name = function.name else { continue }
+            case let .function(function):
+                guard let name = function.name else {
+                    continue
+                }
                 toReturn[name] = m
 
             default:
@@ -38,9 +43,13 @@ class ABICoder {
         return toReturn
     }
 
+    // MARK: Lifecycle
+
     init(_ abi: ABIContract) {
         self.abi = abi
     }
+
+    // MARK: Functions
 
     // MARK: - Decode Block
 
@@ -65,7 +74,7 @@ class ABICoder {
     // MARK: - Encode Block
 
     public func encode(method: String, args: [Any]) throws -> String {
-        let argsObjects = args.map({ $0 as AnyObject })
+        let argsObjects = args.map { $0 as AnyObject }
 
         let foundMethod = methods.filter { key, _ -> Bool in
             return key == method
@@ -79,8 +88,6 @@ class ABICoder {
             throw ABICoderError.couldNotEncode(method: method, args: args)
         }
 
-        let encoded = encodedData.toHexString().addHexPrefix()
-        return encoded
+        return encodedData.toHexString().addHexPrefix()
     }
-
 }

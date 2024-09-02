@@ -1,8 +1,7 @@
 //
 //  Utilities.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/20.
 //
 
 import Foundation
@@ -11,7 +10,9 @@ import Foundation
 
 class Utillities {
     static func isNotEmpty(_ value: String?) -> Bool {
-        guard let value else { return false }
+        guard let value else {
+            return false
+        }
         return Self.isNotEmpty(value)
     }
 
@@ -31,7 +32,8 @@ class Utillities {
     static func getLayerResultWrapper<T>(
         from results: [UNSLocation: AsyncConsumer<T>],
         for location: UNSLocation
-    ) -> AsyncConsumer<T> {
+    )
+        -> AsyncConsumer<T> {
         results[location] ?? (nil, nil)
     }
 
@@ -56,7 +58,9 @@ class Utillities {
 
 extension String {
     static func ~= (lhs: String, rhs: String) -> Bool {
-        guard let regex = try? NSRegularExpression(pattern: rhs) else { return false }
+        guard let regex = try? NSRegularExpression(pattern: rhs) else {
+            return false
+        }
         let range = NSRange(location: 0, length: lhs.utf16.count)
         return regex.firstMatch(in: lhs, options: [], range: range) != nil
     }

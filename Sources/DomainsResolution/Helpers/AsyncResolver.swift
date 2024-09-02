@@ -1,28 +1,34 @@
 //
 //  AsyncResolver.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/9/28.
 //
 
 import Foundation
 
 class AsyncResolver {
+    // MARK: Nested Types
 
     typealias GeneralFunction<T> = () throws -> T
 
+    // MARK: Properties
+
     let asyncGroup = DispatchGroup()
+
+    // MARK: Functions
 
     func safeResolve<T>(
         listOfFunc: [GeneralFunction<T>]
-    ) throws -> T {
+    ) throws
+        -> T {
         let results = try resolve(listOfFunc: listOfFunc)
         return try parseResult(results)
     }
 
     func resolve<T>(
         listOfFunc: [GeneralFunction<T>]
-    ) throws -> [UNSLocation: AsyncConsumer<T>] {
+    ) throws
+        -> [UNSLocation: AsyncConsumer<T>] {
         var results: [UNSLocation: AsyncConsumer<T>] = [:]
         var functions: [UNSLocation: GeneralFunction<T>] = [
             .layer2: listOfFunc[1], .layer1: listOfFunc[0],
@@ -36,7 +42,9 @@ class AsyncResolver {
         for function in functions {
             asyncGroup.enter()
             DispatchQueue.global().async { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
                 do {
                     let value = try function.value()
                     queue.sync {
@@ -58,10 +66,10 @@ class AsyncResolver {
         return results
     }
 
-
     private func parseResult<T>(_ results: [UNSLocation: AsyncConsumer<T>]) throws -> T {
         // filter out results that were not provided (in case some methods are not supported by some providers)
-        let resultsOrder = [UNSLocation.layer2, UNSLocation.layer1, UNSLocation.znsLayer].filter { v in results.keys.contains(v) }
+        let resultsOrder = [UNSLocation.layer2, UNSLocation.layer1, UNSLocation.znsLayer]
+            .filter { v in results.keys.contains(v) }
         
         // Omit the last result since we would have to return it regardless
         for resultKey in resultsOrder.dropLast() {

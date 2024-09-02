@@ -1,8 +1,7 @@
 //
 //  ABIExtensions.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/2/16.
 //
 
 import BigInt
@@ -74,8 +73,7 @@ extension BigUInt {
     func abiEncode(bits: UInt64) -> Data? {
         let data = serialize()
         let paddedLength = UInt64((bits + 7) / 8)
-        let padded = data.setLengthLeft(paddedLength)
-        return padded
+        return data.setLengthLeft(paddedLength)
     }
 }
 
@@ -84,8 +82,7 @@ extension BigInt {
         let isNegative = self < BigInt(0)
         let data = toTwosComplement()
         let paddedLength = UInt64((bits + 7) / 8)
-        let padded = data.setLengthLeft(paddedLength, isNegative: isNegative)
-        return padded
+        return data.setLengthLeft(paddedLength, isNegative: isNegative)
     }
 }
 
@@ -98,8 +95,7 @@ extension BigInt {
         } else {
             let MAX = (BigUInt(1) << (data.count * 8))
             let magnitude = MAX - BigUInt(data)
-            let bigint = BigInt(0) - BigInt(magnitude)
-            return bigint
+            return BigInt(0) - BigInt(magnitude)
         }
     }
 }
@@ -160,7 +156,9 @@ extension String {
     }
 
     func matchingStrings(regex: String) -> [[String]] {
-        guard let regex = try? NSRegularExpression(pattern: regex, options: []) else { return [] }
+        guard let regex = try? NSRegularExpression(pattern: regex, options: []) else {
+            return []
+        }
         let nsString = self as NSString
         let results = regex.matches(in: self, options: [], range: NSRange(location: 0, length: nsString.length))
         return results.map { result in
@@ -174,10 +172,16 @@ extension String {
     func range(from nsRange: NSRange) -> Range<String.Index>? {
         guard
             let from16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location, limitedBy: utf16.endIndex),
-            let to16 = utf16.index(utf16.startIndex, offsetBy: nsRange.location + nsRange.length, limitedBy: utf16.endIndex),
+            let to16 = utf16.index(
+                utf16.startIndex,
+                offsetBy: nsRange.location + nsRange.length,
+                limitedBy: utf16.endIndex
+            ),
             let from = from16.samePosition(in: self),
             let to = to16.samePosition(in: self)
-        else { return nil }
+        else {
+            return nil
+        }
         return from ..< to
     }
 

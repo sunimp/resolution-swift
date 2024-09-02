@@ -1,8 +1,7 @@
 //
 //  EthereumAddress.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/7/21.
 //
 
 import CryptoSwift
@@ -12,12 +11,22 @@ import Foundation
 // MARK: - EthereumAddress
 
 public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
+    // MARK: Nested Types
+
     public typealias StringLiteralType = String
 
     public enum AddressType {
         case normal
         case contractDeployment
     }
+
+    // MARK: Properties
+
+    public var type: AddressType = .normal
+
+    var _address: String
+
+    // MARK: Computed Properties
 
     public var isValid: Bool {
         switch type {
@@ -28,17 +37,12 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
         }
     }
 
-    var _address: String
-    public var type: AddressType = .normal
-    public static func == (lhs: EthereumAddress, rhs: EthereumAddress) -> Bool {
-        lhs.addressData == rhs.addressData && lhs.type == rhs.type
-        //        return lhs.address.lowercased() == rhs.address.lowercased() && lhs.type == rhs.type
-    }
-
     public var addressData: Data {
         switch type {
         case .normal:
-            guard let dataArray = Data.fromHex(_address) else { return Data() }
+            guard let dataArray = Data.fromHex(_address) else {
+                return Data()
+            }
             return dataArray
 
         //                guard let d = dataArray.setLengthLeft(20) else { return Data()}
@@ -57,25 +61,7 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
         }
     }
 
-    public static func toChecksumAddress(_ addr: String) -> String? {
-        let address = addr.lowercased().stripHexPrefix()
-        guard let hash = address.data(using: .ascii)?.sha3(.keccak256).toHexString().stripHexPrefix() else { return nil }
-        var ret = "0x"
-
-        for (i, char) in address.enumerated() {
-            let startIDx = hash.index(hash.startIndex, offsetBy: i)
-            let endIDx = hash.index(hash.startIndex, offsetBy: i + 1)
-            let hashChar = String(hash[startIDx ..< endIDx])
-            let c = String(char)
-            guard let int = Int(hashChar, radix: 16) else { return nil }
-            if int >= 8 {
-                ret += c.uppercased()
-            } else {
-                ret += c
-            }
-        }
-        return ret
-    }
+    // MARK: Lifecycle
 
     public init(stringLiteral value: EthereumAddress.StringLiteralType) {
         self.init(value, type: .normal, ignoreChecksum: true)!
@@ -84,8 +70,12 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
     public init?(_ addressString: String, type: AddressType = .normal, ignoreChecksum: Bool = false) {
         switch type {
         case .normal:
-            guard let data = Data.fromHex(addressString) else { return nil }
-            guard data.count == 20 else { return nil }
+            guard let data = Data.fromHex(addressString) else {
+                return nil
+            }
+            guard data.count == 20 else {
+                return nil
+            }
             if !addressString.hasHexPrefix() {
                 return nil
             }
@@ -101,7 +91,9 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
                     return
                 } else {
                     let checksummedAddress = EthereumAddress.toChecksumAddress(data.toHexString().addHexPrefix())
-                    guard checksummedAddress == addressString else { return nil }
+                    guard checksummedAddress == addressString else {
+                        return nil
+                    }
                     _address = data.toHexString().addHexPrefix()
                     self.type = .normal
                     return
@@ -119,9 +111,43 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
     }
 
     public init?(_ addressData: Data, type: AddressType = .normal) {
-        guard addressData.count == 20 else { return nil }
+        guard addressData.count == 20 else {
+            return nil
+        }
         _address = addressData.toHexString().addHexPrefix()
         self.type = type
+    }
+
+    // MARK: Static Functions
+
+    public static func == (lhs: EthereumAddress, rhs: EthereumAddress) -> Bool {
+        lhs.addressData == rhs.addressData && lhs.type == rhs.type
+        //        return lhs.address.lowercased() == rhs.address.lowercased() && lhs.type == rhs.type
+    }
+
+    public static func toChecksumAddress(_ addr: String) -> String? {
+        let address = addr.lowercased().stripHexPrefix()
+        guard let hash = address.data(using: .ascii)?.sha3(.keccak256).toHexString().stripHexPrefix()
+        else {
+            return nil
+        }
+        var ret = "0x"
+
+        for (i, char) in address.enumerated() {
+            let startIDx = hash.index(hash.startIndex, offsetBy: i)
+            let endIDx = hash.index(hash.startIndex, offsetBy: i + 1)
+            let hashChar = String(hash[startIDx ..< endIDx])
+            let c = String(char)
+            guard let int = Int(hashChar, radix: 16) else {
+                return nil
+            }
+            if int >= 8 {
+                ret += c.uppercased()
+            } else {
+                ret += c
+            }
+        }
+        return ret
     }
 
     public static func contractDeploymentAddress() -> EthereumAddress {
@@ -131,7 +157,6 @@ public struct EthereumAddress: Equatable, ExpressibleByStringLiteral {
     //    public static func fromIBAN(_ iban: String) -> EthereumAddress {
     //
     //    }
-
 }
 
 // MARK: Hashable

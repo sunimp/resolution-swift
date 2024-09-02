@@ -1,8 +1,7 @@
 //
-//  Configuration.swift
-//  DomainsResolution
+//  Configurations.swift
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/2/17.
 //
 
 import Foundation
@@ -10,12 +9,16 @@ import Foundation
 // MARK: - NamingServiceConfig
 
 public struct NamingServiceConfig {
+    // MARK: Properties
+
     let network: String
     let providerURL: String
     var networking: NetworkingLayer
     let proxyReader: String?
     let registryAddresses: [String]?
-    
+
+    // MARK: Lifecycle
+
     public init(
         providerURL: String,
         network: String = "",
@@ -34,10 +37,14 @@ public struct NamingServiceConfig {
 // MARK: - UnsLocations
 
 public struct UnsLocations {
+    // MARK: Properties
+
     let layer1: NamingServiceConfig
     let layer2: NamingServiceConfig
     let znsLayer: NamingServiceConfig
-    
+
+    // MARK: Lifecycle
+
     public init(
         layer1: NamingServiceConfig,
         layer2: NamingServiceConfig,
@@ -54,9 +61,13 @@ let UD_RPC_PROXY_BASE_URL = "https://api.unstoppabledomains.com/resolve"
 // MARK: - Configurations
 
 public struct Configurations {
+    // MARK: Properties
+
     let uns: UnsLocations
     let apiKey: String? = nil
-    
+
+    // MARK: Lifecycle
+
     public init(
         uns: UnsLocations
     ) {
@@ -92,6 +103,8 @@ public struct Configurations {
             znsLayer: znsLayer
         )
     }
+
+    // MARK: Static Functions
 
     public static func getLibVersion() -> String {
         "UnstoppableDomains/resolution-swift/6.2.2"

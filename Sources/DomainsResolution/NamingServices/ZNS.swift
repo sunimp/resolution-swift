@@ -1,13 +1,14 @@
 //
 //  ZNS.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/9/18.
 //
 
 import Foundation
 
 class ZNS: CommonNamingService, NamingService {
+    // MARK: Properties
+
     var network: String
 
     let registryAddress: String
@@ -15,6 +16,8 @@ class ZNS: CommonNamingService, NamingService {
         "mainnet": "0x9611c53be6d1b32058b2747bdececed7e1216793",
         "testnet": "0xB925adD1d5EaF13f40efD43451bF97A22aB3d727",
     ]
+
+    // MARK: Lifecycle
 
     init(_ config: NamingServiceConfig) throws {
         network = config.network
@@ -30,6 +33,16 @@ class ZNS: CommonNamingService, NamingService {
         self.registryAddress = registryAddress!
         super.init(name: .zns, providerURL: config.providerURL, networking: config.networking)
     }
+
+    // MARK: Overridden Functions
+
+    // MARK: - CommonNamingService
+
+    override func childHash(parent: [UInt8], label: [UInt8]) -> [UInt8] {
+        (parent + label.sha2(.sha256)).sha2(.sha256)
+    }
+
+    // MARK: Functions
 
     func isSupported(domain: String) -> Bool {
         domain.hasSuffix(".zil")
@@ -51,8 +64,7 @@ class ZNS: CommonNamingService, NamingService {
 
     func addr(domain: String, ticker: String) throws -> String {
         let key = "crypto.\(ticker.uppercased()).address"
-        let result = try record(domain: domain, key: key)
-        return result
+        return try record(domain: domain, key: key)
     }
 
     func addr(domain _: String, network _: String, token _: String) throws -> String {
@@ -72,15 +84,14 @@ class ZNS: CommonNamingService, NamingService {
     }
 
     func records(keys: [String], for domain: String) throws -> [String: String] {
-        guard let records = try records(address: try resolver(domain: domain), keys: []) as? [String: String] else {
+        guard let records = try records(address: resolver(domain: domain), keys: []) as? [String: String] else {
             throw ResolutionError.recordNotFound(name.rawValue)
         }
-        let filtered = records.filter { keys.contains($0.key) }
-        return filtered
+        return records.filter { keys.contains($0.key) }
     }
 
     func allRecords(domain: String) throws -> [String: String] {
-        guard let records = try records(address: try resolver(domain: domain), keys: []) as? [String: String] else {
+        guard let records = try records(address: resolver(domain: domain), keys: []) as? [String: String] else {
             throw ResolutionError.recordNotFound(name.rawValue)
         }
         return records
@@ -110,10 +121,12 @@ class ZNS: CommonNamingService, NamingService {
         return resolverAddress
     }
 
-    // MARK: - CommonNamingService
-
-    override func childHash(parent: [UInt8], label: [UInt8]) -> [UInt8] {
-        (parent + label.sha2(.sha256)).sha2(.sha256)
+    func buildContract(address: String) -> ContractZNS {
+        ContractZNS(
+            providerURL: providerURL,
+            address: address.replacingOccurrences(of: "0x", with: ""),
+            networking: networking
+        )
     }
 
     // MARK: - Helper functions
@@ -150,9 +163,5 @@ class ZNS: CommonNamingService, NamingService {
         }
 
         return records
-    }
-
-    func buildContract(address: String) -> ContractZNS {
-        ContractZNS(providerURL: providerURL, address: address.replacingOccurrences(of: "0x", with: ""), networking: networking)
     }
 }

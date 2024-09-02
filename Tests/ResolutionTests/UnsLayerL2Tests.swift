@@ -1,8 +1,7 @@
 //
 //  UnsLayerL2Tests.swift
-//  ResolutionTests
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/9/28.
 //
 
 import XCTest
@@ -16,9 +15,12 @@ import XCTest
 // MARK: - UnsLayerL2Tests
 
 class UnsLayerL2Tests: XCTestCase {
+    // MARK: Properties
+
     var unsLayer: UNSLayer!
-    
-    
+
+    // MARK: Overridden Functions
+
     override func setUp() {
         let providerURL = try! ResolutionTests.getL2TestNetRpcURL()
         let config = NamingServiceConfig(
@@ -49,7 +51,9 @@ class UnsLayerL2Tests: XCTestCase {
         ]
         unsLayer = try! UNSLayer(name: .layer2, config: config, contracts: contracts)
     }
-    
+
+    // MARK: Functions
+
     func parseAbi(fromFile name: String) throws -> ABIContract? {
         #if INSIDE_PM
         let bundler = Bundle.module
@@ -60,11 +64,9 @@ class UnsLayerL2Tests: XCTestCase {
             let data = try Data(contentsOf: filePath)
             let jsonDecoder = JSONDecoder()
             let abi = try jsonDecoder.decode([ABI.Record].self, from: data)
-            let abiNative = try abi.map({ record -> ABI.Element in
+            return try abi.map { record -> ABI.Element in
                 return try record.parse()
-            })
-
-            return abiNative
+            }
         }
         return nil
     }
@@ -76,31 +78,31 @@ class UnsLayerL2Tests: XCTestCase {
         let domain = TestHelpers.getTestDomain(.UNREGISTERED_DOMAIN)
         let tokenID = "0x6d8b296e38dfd295f2f4feb9ef2721c48210b7d77c0a08867123d9bd5150cf47"
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.owner(domain: domain) },
+            completion: { _ = try self.unsLayer.owner(domain: domain) },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.addr(domain: domain, ticker: "whatever") },
+            completion: { _ = try self.unsLayer.addr(domain: domain, ticker: "whatever") },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.getDomainName(tokenID: tokenID) },
+            completion: { _ = try self.unsLayer.getDomainName(tokenID: tokenID) },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.getTokenUri(tokenID: tokenID) },
+            completion: { _ = try self.unsLayer.getTokenUri(tokenID: tokenID) },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.record(domain: domain, key: "whatever") },
+            completion: { _ = try self.unsLayer.record(domain: domain, key: "whatever") },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.records(keys: ["whatever"], for: domain) },
+            completion: { _ = try self.unsLayer.records(keys: ["whatever"], for: domain) },
             expectedError: ResolutionError.unregisteredDomain
         )
         TestHelpers.checkError(
-            completion: { let _ = try self.unsLayer.resolver(domain: domain) },
+            completion: { _ = try self.unsLayer.resolver(domain: domain) },
             expectedError: ResolutionError.unregisteredDomain
         )
     }

@@ -1,8 +1,7 @@
 //
 //  TestHelpers.swift
-//  ResolutionTests
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2021/9/28.
 //
 
 import XCTest
@@ -16,7 +15,7 @@ import XCTest
 // MARK: - TestHelpers
 
 class TestHelpers {
-
+    // MARK: Nested Types
 
     enum DOMAINS {
         case DOMAIN
@@ -30,6 +29,8 @@ class TestHelpers {
         case LAYER2_DOMAIN
     }
 
+    // MARK: Static Properties
+
     static let TEST_DOMAINS: [DOMAINS: String] = [
         .DOMAIN: "reseller-test-udtesting-459239285.crypto",
         .WALLET_DOMAIN: "uns-devtest-265f8f.wallet",
@@ -42,8 +43,10 @@ class TestHelpers {
         .LAYER2_DOMAIN: "udtestdev-test-l2-domain-784391.wallet",
     ]
 
+    // MARK: Static Functions
+
     static func getTestDomain(_ type: DOMAINS) -> String {
-        Self.TEST_DOMAINS[type]!
+        TEST_DOMAINS[type]!
     }
 
     static func checkError(completion: @escaping () throws -> Void, expectedError: ResolutionError) {
@@ -63,7 +66,7 @@ class TestHelpers {
         switch result {
         case .success:
             XCTFail("Expected \(expectedError), but got none")
-        case .failure(let error):
+        case let .failure(error):
             assert(error == expectedError, "Expected \(expectedError), but got \(error)")
             return
         }

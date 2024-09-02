@@ -1,8 +1,7 @@
 //
 //  CommonNamingService.swift
-//  DomainsResolution
 //
-//  Created by Sun on 2024/8/21.
+//  Created by Sun on 2020/8/20.
 //
 
 import Foundation
@@ -10,12 +9,7 @@ import Foundation
 // MARK: - CommonNamingService
 
 class CommonNamingService {
-    static let hexadecimalPrefix = "0x"
-    static let jsonExtension = "json"
-
-    let name: NamingServiceName
-    let providerURL: String
-    let networking: NetworkingLayer
+    // MARK: Nested Types
 
     enum ContractType: String {
         case unsRegistry = "UNSRegistry"
@@ -24,16 +18,33 @@ class CommonNamingService {
         case resolver = "Resolver"
         case proxyReader = "ProxyReader"
 
+        // MARK: Computed Properties
+
         var name: String {
             rawValue
         }
     }
+
+    // MARK: Static Properties
+
+    static let hexadecimalPrefix = "0x"
+    static let jsonExtension = "json"
+
+    // MARK: Properties
+
+    let name: NamingServiceName
+    let providerURL: String
+    let networking: NetworkingLayer
+
+    // MARK: Lifecycle
 
     init(name: NamingServiceName, providerURL: String, networking: NetworkingLayer) {
         self.name = name
         self.providerURL = providerURL
         self.networking = networking
     }
+
+    // MARK: Functions
 
     func buildContract(address: String, type: ContractType) throws -> Contract {
         try buildContract(address: address, type: type, providerURL: providerURL)
@@ -70,11 +81,9 @@ class CommonNamingService {
             let data = try Data(contentsOf: filePath)
             let jsonDecoder = JSONDecoder()
             let abi = try jsonDecoder.decode([ABI.Record].self, from: data)
-            let abiNative = try abi.map({ record -> ABI.Element in
+            return try abi.map { record -> ABI.Element in
                 return try record.parse()
-            })
-
-            return abiNative
+            }
         }
         return nil
     }
@@ -146,12 +155,20 @@ extension CommonNamingService {
         let bundler = Bundle(for: self)
         #endif
 
-        guard let idString = networkIDs[network] else { return nil }
+        guard let idString = networkIDs[network] else {
+            return nil
+        }
 
         if let filePath = bundler.url(forResource: Self.networkConfigFileName, withExtension: "json") {
-            guard let data = try? Data(contentsOf: filePath) else { return nil }
-            guard let info = try? JSONDecoder().decode(NewtorkConfigJson.self, from: data) else { return nil }
-            guard let currentNetwork = info.networks[idString] else { return nil }
+            guard let data = try? Data(contentsOf: filePath) else {
+                return nil
+            }
+            guard let info = try? JSONDecoder().decode(NewtorkConfigJson.self, from: data) else {
+                return nil
+            }
+            guard let currentNetwork = info.networks[idString] else {
+                return nil
+            }
             return currentNetwork.contracts
         }
         return nil
@@ -165,11 +182,14 @@ extension CommonNamingService {
         #endif
 
         if let filePath = bundler.url(forResource: Self.recordKeysFileName, withExtension: "json") {
-            guard let data = try? Data(contentsOf: filePath) else { return nil }
-            guard let recordFile = try? JSONDecoder().decode(ResolverKeysJson.self, from: data) else { return nil }
+            guard let data = try? Data(contentsOf: filePath) else {
+                return nil
+            }
+            guard let recordFile = try? JSONDecoder().decode(ResolverKeysJson.self, from: data) else {
+                return nil
+            }
             let keyEntries = recordFile.keys
-            let keys = Array(keyEntries.keys)
-            return keys
+            return Array(keyEntries.keys)
         }
         return nil
     }
@@ -187,16 +207,16 @@ extension CommonNamingService {
         var err: Error?
         let semaphore = DispatchSemaphore(value: 0)
 
-        networking.makeHttpPostRequest(
+        try networking.makeHttpPostRequest(
             url: url,
             httpMethod: "POST",
             httpHeaderContentType: "application/json",
-            httpBody: try JSONEncoder().encode(payload)
+            httpBody: JSONEncoder().encode(payload)
         ) { result in
             switch result {
-            case .success(let response):
+            case let .success(response):
                 resp = response
-            case .failure(let error):
+            case let .failure(error):
                 err = error
             }
             semaphore.signal()
@@ -206,7 +226,7 @@ extension CommonNamingService {
             throw err!
         }
         switch resp?[0].result {
-        case .string(let result):
+        case let .string(result):
             return result
         default:
             return ""
